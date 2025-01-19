@@ -55,7 +55,7 @@ document.addEventListener('mouseup', (event)=>{
 
 document.addEventListener('click', () => {
   if (clickchecker(scene,camera,mouse)){
-    // console.log('reached backend');
+    console.log('reached backend');
     fetch('/api/challenge_1')
     .then(response => response.json())
     .then(data => {
