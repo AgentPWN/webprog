@@ -20,20 +20,19 @@ export async function dockerize(image, res) {
         const container = await docker.createContainer({
             Image: image,
             ExposedPorts: {
-                [portConfig.exposedPort]: {},
+                [portConfig.exposedPort]: {}, // Port exposed by the container
             },
             HostConfig: {
                 PortBindings: {
                     [portConfig.exposedPort]: [
                         {
-                            HostPort: portConfig.HostPort,
+                            HostPort: portConfig.hostPort, // Port mapped on the host
                         },
                     ],
                 },
             },
         });
-
-        console.log('2');
+        
         console.log('Container created');
         await container.start();
         console.log('Container started');

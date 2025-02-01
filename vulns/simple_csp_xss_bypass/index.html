@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content=" script-src 'nonce-abcde' ">
+    <title>CSP XSS BYPASS 1</title>       
+</head>
+<body>
+    <label for="bug">Report bug here</label>
+    <input type="text" id="bug" name="bug">
+    <button>Enter</button>  
+    <script nonce="abcde">
+        function csp(){
+            let report = document.getElementById("bug");
+            let value = report.value;
+            const text = document.getElementById('xss');
+            text.innerHTML = value;
+        }
+    </script>
+    <script nonce="abcde">
+        document.querySelector("button").addEventListener("click",csp);
+    </script>  
+
+    <p id="xss">your input will be put here</p>
+</body>
+</html>
