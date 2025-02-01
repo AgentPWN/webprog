@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content=" script-src 'nonce-abcde' ">
+    <!-- <meta http-equiv="Content-Security-Policy" content=" script-src 'self' 'unsafe-inline' "> -->
     <title>CSP XSS BYPASS 1</title>       
 </head>
 <body>
@@ -14,14 +14,20 @@
         function csp(){
             let report = document.getElementById("bug");
             let value = report.value;
-            const text = document.getElementById('xss');
-            text.innerHTML = value;
+            fetch("/api/bug_report",{
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body: JSON.stringify({message:"value"})
+            })            
+            .then(response=>response.json())
+            .then(console.log("data has been added to the report"))
         }
     </script>
     <script nonce="abcde">
         document.querySelector("button").addEventListener("click",csp);
     </script>  
-
     <p id="xss">your input will be put here</p>
 </body>
 </html>
