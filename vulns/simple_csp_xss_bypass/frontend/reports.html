@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>CSP XSS BYPASS 1</title>       
@@ -10,16 +11,21 @@
         <ul id="buglist"></ul>
         <script>
             async function loadbugs(){
-                const response = await fetch("/api/get_bugs");
+                const response = await fetch("/api/reports");
                 const bugs = await response.json();
                 const buglist = document.getElementById("buglist");
                 buglist.innerHTML = "";
-                bugs.forEach(bug=>{
+                console.log(bugs.reports);
+                bugs.reports.forEach(bug=>{
                     const li = document.createElement("li");
-                    li.innerHTML = `<strong>${bugs.title}</strong>:${bugs.description}`;
+                    xss = bug.message;
+                    li.innerHTML = `<strong>${bug.name}</strong>:${xss}`;
                     buglist.appendChild(li);
                 });
             }
+        </script>
+        <script>
+            loadbugs();
         </script>
     </body>
 </html>

@@ -7,26 +7,31 @@
     <title>CSP XSS BYPASS 1</title>       
 </head>
 <body>
+    <label for="name">Please enter name</label>
+    <input type="text" id="name" name="name">
     <label for="bug">Report bug here</label>
     <input type="text" id="bug" name="bug">
-    <button>Enter</button>  
+    <button id="report">Enter</button>  
+    <a href="/reports.html" ><button>click me</button></a>
     <script nonce="abcde">
-        function csp(){
+        function report_bugs(){
             let report = document.getElementById("bug");
             let value = report.value;
+            let name = document.getElementById('name');
+            let data = name.value;
             fetch("/api/bug_report",{
                 method:"POST",
                 headers:{
                     "Content-Type":"application/json"
                 },
-                body: JSON.stringify({message:"value"})
+                body: JSON.stringify({name:data,message:value})
             })            
             .then(response=>response.json())
             .then(console.log("data has been added to the report"))
         }
     </script>
     <script nonce="abcde">
-        document.querySelector("button").addEventListener("click",csp);
+        document.querySelector("#report").addEventListener("click",report_bugs);
     </script>  
     <p id="xss">your input will be put here</p>
 </body>
