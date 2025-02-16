@@ -4,21 +4,21 @@ const path = require('path');
 
 const CONFIG = {
     APPNAME: process.env['APPNAME'] || "Admin",
-    APPURL: process.env['APPURL'] || "http://localhost:2000/api/reports",
+    APPURL: process.env['APPURL'] || "http://172.17.0.1",
     APPURLREGEX: process.env['APPURLREGEX'] || "^.*$",
-    APPFLAG: process.env['APPFLAG'] || "dev{flag}",
+    APPFLAG: process.env['APPFLAG'] || "yooyyiyiyiyiiyi",
     APPLIMITTIME: Number(process.env['APPLIMITTIME'] || "60"),
     APPLIMIT: Number(process.env['APPLIMIT'] || "5"),
-    // APPEXTENSIONS: (() => {
-    //     const extDir = path.join(__dirname, 'extensions');
-    //     const dir = [];
-    //     fs.readdirSync(extDir).forEach(file => {
-    //         if (fs.lstatSync(path.join(extDir, file)).isDirectory()) {
-    //             dir.push(path.join(extDir, file));
-    //         }
-    //     });
-    //     return dir.join(',');
-    // })(),
+    APPEXTENSIONS: (() => {
+        const extDir = path.join(__dirname, 'extensions');
+        const dir = [];
+        fs.readdirSync(extDir).forEach(file => {
+            if (fs.lstatSync(path.join(extDir, file)).isDirectory()) {
+                dir.push(path.join(extDir, file));
+            }
+        });
+        return dir.join(',');
+    })(),
     APPBROWSER: process.env['BROWSER'] || 'chromium'
 };
 
@@ -108,9 +108,11 @@ module.exports = {
             console.error(e);
             return false;
         } finally {
-            await context.browser().close();
-
+            if (CONFIG.APPEXTENSIONS !== "") {
+                await context.browser().close();
+            } else {
+                await context.close();
             }
         }
-    
+    }
 };

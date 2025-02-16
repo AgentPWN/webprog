@@ -59,7 +59,14 @@ document.addEventListener('click', () => {
     fetch('/api/chal1')
     .then(response => response.json())
     .then(data => {
-      alert(data.message);
+      const dialog = document.getElementById("chal_desc");
+      const closebutton = document.querySelector("dialog button");
+      const chal = dialog.innerHTML();
+      chal = `<p>${challenge.desc}<br>challenge link: ${data}<p>`;
+      dialog.showModal();
+      closebutton.addEventListener('click',()=>{
+        dialog.close();
+      });
     });
   }
 });
