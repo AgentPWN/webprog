@@ -1,6 +1,6 @@
 import * as THREE from '/node_modules/three/build/three.module.js';
 import { clickchecker } from './click_checker.js';
-// import {modelloader} from './loader.js';
+import {modelloader} from './loader.js';
 import {lighting} from './lighting.js';
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
@@ -24,8 +24,26 @@ camera.lookAt(0, 0, 0);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
+console.log(1)
+try{lighting(scene);}
+catch(error){
+  console.error("lighting.js",error)
+}
+console.log(2)
 
-lighting(scene);
+try{
+modelloader(scene,"../assets/models/buildings/cyberpunk.glb");}
+catch(error){
+  console.error("loader.js",error)
+}
+console.log(3)
+
+const cube = new THREE.Mesh(
+  new THREE.BoxGeometry(1, 1, 1),
+  new THREE.MeshPhongMaterial({ color: 0x00ff00 }),
+  console.log('this worked')
+);
+scene.add(cube);
 
 document.addEventListener('mousedown', (event) =>{
   isDragging = true;
@@ -82,15 +100,15 @@ document.addEventListener('click', () => {
   }
 });
 
-for (let i = 0; i < 1000; i++) {
-  const building = new THREE.Mesh(geometry, material);
-  building.name = 'button';
-  building.userData.id = "1"; 
-  building.position.set(Math.random() * 200 - 100, 0, Math.random() * 200 - 100);
-  building.scale.set(1, Math.random() * 10 + 1, 1);
-  city.add(building);
-}
-scene.add(city);
+// for (let i = 0; i < 1000; i++) {
+//   const building = new THREE.Mesh(geometry, material);
+//   building.name = 'button';
+//   building.userData.id = "1"; 
+//   building.position.set(Math.random() * 200 - 100, 0, Math.random() * 200 - 100);
+//   building.scale.set(1, Math.random() * 10 + 1, 1);
+//   city.add(building);
+// }
+// scene.add(city);
 
 function renderScene() {
   renderer.render(scene, camera);
