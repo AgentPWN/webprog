@@ -4,7 +4,7 @@ export async function dockerize(image, res) {
     const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 
     const imagePortMap = {
-        chal1: { exposedPort: '5000/tcp', hostPort: '80' },
+        'nginx-cookie-sqli': { exposedPort: '5000/tcp', hostPort: '80' },
         chal2: { exposedPort: '8080/tcp', hostPort: '8081' },
         chal3: { exposedPort: '3000/tcp', hostPort: '3001' },
     };

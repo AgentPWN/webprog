@@ -56,24 +56,36 @@ document.addEventListener('mouseup', (event)=>{
 document.addEventListener('click', () => {
   if (clickchecker(scene,camera,mouse)){
     console.log('reached backend');
-    fetch('/api/chal1')
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(scene.children, true);
+    const clickedObject = intersects[0].object;
+    fetch(`/api/${clickedObject.userData.id}`)
     .then(response => response.json())
     .then(data => {
       const dialog = document.getElementById("chal_desc");
-      const closebutton = document.querySelector("dialog button");
-      const chal = dialog.innerHTML();
-      chal = `<p>${challenge.desc}<br>challenge link: ${data}<p>`;
+      // dialog.innerHTML = `
+      //   <p>${challenge.desc}<br>Challenge link: ${data}</p>
+      //   <button id="closeDialog">Close</button>
+      // `;
+      dialog.innerHTML = `
+      <p> this website is a work under progress, please give us some time, we will get back to you</p>
+      <button id="closeDialog">Close</button>
+      `;
       dialog.showModal();
-      closebutton.addEventListener('click',()=>{
+      const closebutton = document.getElementById("closeDialog");
+      closebutton.addEventListener("click", () => {
         dialog.close();
       });
     });
+    
   }
 });
 
 for (let i = 0; i < 1000; i++) {
   const building = new THREE.Mesh(geometry, material);
-  building.name = 'button'
+  building.name = 'button';
+  building.userData.id = "1"; 
   building.position.set(Math.random() * 200 - 100, 0, Math.random() * 200 - 100);
   building.scale.set(1, Math.random() * 10 + 1, 1);
   city.add(building);
