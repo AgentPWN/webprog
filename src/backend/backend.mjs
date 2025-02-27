@@ -19,22 +19,22 @@ const db = new sqlite3.Database('docker_images.db', (err) => {
 //     }
 // });
 const app = express();
-const PORT = 3000;
+const PORT = 3001;
 
 // Recreate __dirname using import.meta.url
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+console.log(__dirname)
+app.use(express.static(path.join(__dirname, '../../')));
 
-app.use(express.static(path.join(__dirname, '../frontend')));
 
-
-app.use('../../node_modules', express.static(path.join(__dirname, 'node_modules')));
+app.use('node_modules', express.static(path.join(__dirname, '../../node_modules')));
 
 
 
 app.get('/api/:buildingid', async (req, res) => {
   try {
     const buildingid = req.params.buildingid;
-    
+    console.log("hello world")
     db.get(
       'SELECT docker_image FROM docker_images WHERE id = ? OR docker_image = ?',
       [buildingid, 'nginx_cookie_sqli'],

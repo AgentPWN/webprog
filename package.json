@@ -1,20 +1,24 @@
 {
-  "name": "web_programming",
+  "name": "webprog",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "parcel src/index.html",
-    "build": "parcel build src/index.html"
+    "dev": "vite",
+    "server": "node src/backend/backend.mjs",
+    "start": "concurrently \"npm run server\" \"npm run dev\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "parcel": "^2.13.3"
+    "parcel": "^2.13.3",
+    "vite": "^6.2.0"
   },
   "dependencies": {
+    "dockerode": "^4.0.4",
     "express": "^4.21.2",
+    "sqlite3": "^5.1.7",
     "three": "^0.173.0"
   }
 }

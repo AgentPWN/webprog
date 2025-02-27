@@ -1,6 +1,7 @@
 import * as THREE from '/node_modules/three/build/three.module.js';
 import { clickchecker } from './click_checker.js';
-import {modelloader} from './loader.js';
+import { GLTFLoader } from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+// import {modelloader} from './loader.js';
 import {lighting} from './lighting.js';
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
@@ -32,16 +33,31 @@ catch(error){
 console.log(2)
 
 
-modelloader(scene,"./../models/buildings/cyberpunk.glb");
+const url = "/src/models/buildings/cyberpunk.glb";
+const loader = new GLTFLoader();
 
+    loader.load(url, function(gltf){
+        const model = gltf.scene.children[0];
+        model.userData.id = 1;
+        scene.add(model);
+        const modelCount = gltf.scene.children.length;
+
+
+    // console.log(`Number of models in the pack: ${modelCount}`);
+
+    // List all model names
+    // gltf.scene.children.forEach((child, index) => {
+        // console.log(`Model ${index + 1}: ${child.name || "Unnamed Model"}`);
+    // });
+    });
 console.log(3)
 
-const cube = new THREE.Mesh(
-  new THREE.BoxGeometry(1, 1, 1),
-  new THREE.MeshPhongMaterial({ color: 0x00ff00 }),
-  console.log('this worked')
-);
-scene.add(cube);
+// const cube = new THREE.Mesh(
+//   new THREE.BoxGeometry(1, 1, 1),
+//   new THREE.MeshPhongMaterial({ color: 0x00ff00 }),
+//   console.log('this worked')
+// );
+// scene.add(cube);
 
 document.addEventListener('mousedown', (event) =>{
   isDragging = true;
@@ -76,6 +92,8 @@ document.addEventListener('click', () => {
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObjects(scene.children, true);
     const clickedObject = intersects[0].object;
+    console.log(`${clickedObject.userData.id}`);
+    
     fetch(`/api/${clickedObject.userData.id}`)
     .then(response => response.json())
     .then(data => {

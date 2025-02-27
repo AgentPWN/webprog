@@ -11,7 +11,7 @@ export function clickchecker(scene,camera,mouse){
           return true;
         } else {
           console.log("clicked object")
-          return false;
+          return true;
         }
       } else {
         console.log('No intersections detected');
