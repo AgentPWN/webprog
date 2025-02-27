@@ -1,6 +1,6 @@
 import Docker from 'dockerode';
 
-export async function dockerize(image, res) {
+export async function dockerize(image) {
     const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 
     const imagePortMap = {
@@ -12,32 +12,22 @@ export async function dockerize(image, res) {
     const portConfig = imagePortMap[image];
 
     if (!portConfig) {
-        res.status(400).json({ error: `Image ${image} not found in configuration.` });
+        console.error(`Image ${image} not found in configuration.`);
         return;
     }
 
     try {
         const container = await docker.createContainer({
             Image: image,
-            ExposedPorts: {
-                [portConfig.exposedPort]: {}, // Port exposed by the container
-            },
+            ExposedPorts: { [portConfig.exposedPort]: {} },
             HostConfig: {
-                PortBindings: {
-                    [portConfig.exposedPort]: [
-                        {
-                            HostPort: portConfig.hostPort, // Port mapped on the host
-                        },
-                    ],
-                },
+                PortBindings: { [portConfig.exposedPort]: [{ HostPort: portConfig.hostPort }] },
             },
         });
-        
+
         console.log('Container created');
         await container.start();
         console.log('Container started');
-        
-        res.json({ message: `127.0.0.1:${portConfig.hostPort}` });
 
         setTimeout(async () => {
             try {
@@ -46,11 +36,10 @@ export async function dockerize(image, res) {
                 await container.remove();
                 console.log(`Container ${container.id} removed`);
             } catch (err) {
-                console.error(`Error stopping container ${container.id}:`, err);
+                console.error(`Error stopping/removing container ${container.id}:`, err);
             }
         }, 10 * 1000);
     } catch (err) {
-        console.error('Error:', err);
-        res.status(500).json({ error: 'Failed to create/start the container.' });
+        console.error('Docker error:', err);
     }
 }

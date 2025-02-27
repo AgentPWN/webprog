@@ -91,21 +91,24 @@ document.addEventListener('click', () => {
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObjects(scene.children, true);
-    const clickedObject = intersects[0].object;
+    let clickedObject = intersects[0].object;
+    while (clickedObject.parent && !clickedObject.userData.id) {
+      clickedObject = clickedObject.parent;
+    }
     console.log(`${clickedObject.userData.id}`);
-    
-    fetch(`/api/${clickedObject.userData.id}`)
+    fetch(`http://localhost:3001/api/${clickedObject.userData.id}`)
     .then(response => response.json())
     .then(data => {
       const dialog = document.getElementById("chal_desc");
-      // dialog.innerHTML = `
-      //   <p>${challenge.desc}<br>Challenge link: ${data}</p>
-      //   <button id="closeDialog">Close</button>
-      // `;
+      console.log(data);
       dialog.innerHTML = `
-      <p> this website is a work under progress, please give us some time, we will get back to you</p>
-      <button id="closeDialog">Close</button>
+        <p>${data.desc}<br>Challenge link: ${data.link}</p>
+        <button id="closeDialog">Close</button>
       `;
+      // dialog.innerHTML = `
+      // <p> this website is a work under progress, please give us some time, we will get back to you</p>
+      // <button id="closeDialog">Close</button>
+      // `;
       dialog.showModal();
       const closebutton = document.getElementById("closeDialog");
       closebutton.addEventListener("click", () => {
