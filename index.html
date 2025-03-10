@@ -9,5 +9,43 @@
         <script type="module" src="./src/frontend/frontend.js"></script>
         <dialog id="chal_desc">
         </dialog>
+        <script type="module">
+            import { flagchecker } from "./src/frontend/frontend.js";
+            function submitFlag(challengeId) {
+                let name = document.getElementsByName("flag")[0];
+                console.log(name);
+                const inputElement = document.getElementById(challengeId);
+                
+                if (!inputElement) {
+                    console.error("Input element not found!");
+                    return;
+                }
+            
+                const flagValue = inputElement.value;
+            
+                if (!flagValue) {
+                    alert("Please enter a flag!");
+                    return;
+                }
+            
+                if (flagchecker(name.id, name.value)) {
+                    console.log("let's go");
+                    alert("You solved it!!");
+            
+                    // Explicitly get the dialog again
+                    const dialog = document.getElementById("chal_desc"); 
+                    if (dialog) {
+                        dialog.close(); // Properly close the dialog
+                    } else {
+                        console.error("Dialog element not found!");
+                    }
+                }
+            }
+            
+            window.submitFlag = submitFlag;
+            
+
+          </script>
+          
     </body>
 </html>

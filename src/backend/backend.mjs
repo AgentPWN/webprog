@@ -17,6 +17,7 @@ const db = new sqlite3.Database('docker_images.db', (err) => {
 const app = express();
 const PORT = 3001;
 app.use(cors()); // Enable CORS globally
+app.use(express.json());  
 
 // Recreate __dirname using import.meta.url
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -24,9 +25,24 @@ console.log(__dirname);
 app.use(express.static(path.join(__dirname, '../../')));
 app.use('/node_modules', express.static(path.join(__dirname, '../../node_modules')));
 
+app.post('/api/checkflag', async(req,res)=>{
+    const {id,flag} = req.body;
+    res.status(200).json({message:"Flag is correct!!"});
+});
 
-app.get('/api/files',async(req,res)=>{
-    const directory = path.join(__dirname,'../models/buildings');
+app.get('/api/files/noncyberpunk',async(req,res)=>{
+    const directory = path.join(__dirname,'../models/buildings/noncyberpunk');
+    fs.readdir(directory,(err,files)=>{
+        if (err){
+            return res.status(500).json({error:`unable to scan directory:${err}`});
+        }
+        else{
+            res.json({files});
+        }
+    });
+});
+app.get('/api/files/cyberpunk',async(req,res)=>{
+    const directory = path.join(__dirname,'../models/buildings/cyberpunk');
     fs.readdir(directory,(err,files)=>{
         if (err){
             return res.status(500).json({error:`unable to scan directory:${err}`});
@@ -44,8 +60,8 @@ app.get('/api/:id', async (req, res) => {
         console.log("Received request for:", buildingid);
 
         db.get(
-            'SELECT docker_image, desc, link FROM docker_images WHERE id = ? OR docker_image = ?',
-            [buildingid, 'nginx_cookie_sqli'],
+            'SELECT docker_image, desc, link FROM docker_images WHERE id = ?',
+            [buildingid],
             async (err, row) => {
                 if (err) {
                     console.error('Database error:', err.message);

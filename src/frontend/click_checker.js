@@ -6,7 +6,7 @@ export function clickchecker(scene,camera,mouse){
       if (intersects.length > 0) {
         const clickedObject = intersects[0].object;
     
-        if (clickedObject.name === 'button') {
+        if (clickedObject.id === 'flag') {
           console.log("clicked button");
           return true;
         } else {

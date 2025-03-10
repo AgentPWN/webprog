@@ -1,5 +1,5 @@
 import * as THREE from '/node_modules/three/build/three.module.js';
-import { clickchecker } from './click_checker.js';
+// import { clickchecker } from './click_checker.js';
 import { GLTFLoader } from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 // import {modelloader} from './loader.js';
 import {lighting} from './lighting.js';
@@ -13,36 +13,32 @@ scene.background = new THREE.Color(0xffffff);
 const city = new THREE.Group();
 let isDragging = false;
 let startMousePosition,currentMousePosition,deltax,deltay = 0;
-// const gridHelper = new THREE.GridHelper(200, 50); 
-// scene.add(gridHelper);
-
-// const axesHelper = new THREE.AxesHelper(100);
-// scene.add(axesHelper);
-
 camera.position.set(20, 15, 20);
 camera.lookAt(0, 0, 0);
-
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
-console.log(1)
-try{lighting(scene);}
+
+let chal = 0;
+try{
+  lighting(scene);
+}
 catch(error){
   console.error("lighting.js",error)
 }
-console.log(2)
+
 let id = 0;
 let x = 0;
 let y = 0;
 let z = 0;
-fetch('http://localhost:3001/api/files')
+fetch('http://localhost:3001/api/files/noncyberpunk')
 .then(response=>response.json())
 .then(data=>{
   data.files.forEach(element => {
-    console.log(element);
-    let url = `/src/models/buildings/${element}`;
+    //console.log(element);
+    let url = `/src/models/buildings/noncyberpunk/${element}`;
     const loader = new GLTFLoader();
-    console.log(url);
+    //console.log(url);
     loader.load(url, function(gltf){
         const model = gltf.scene.children[0];
         id +=1
@@ -51,34 +47,18 @@ fetch('http://localhost:3001/api/files')
         // y += 1;
         // z += 10;
         model.userData.id = id;
+        model.userData.name = element;
+        model.userData.solved = 0;
         scene.add(model);
         const modelCount = gltf.scene.children.length;
   });
 });
 
-
-
-
-    // console.log(`Number of models in the pack: ${modelCount}`);
-
-    // List all model names
-    // gltf.scene.children.forEach((child, index) => {
-        // console.log(`Model ${index + 1}: ${child.name || "Unnamed Model"}`);
-    // });
     });
-console.log(3)
-
-// const cube = new THREE.Mesh(
-//   new THREE.BoxGeometry(1, 1, 1),
-//   new THREE.MeshPhongMaterial({ color: 0x00ff00 }),
-//   console.log('this worked')
-// );
-// scene.add(cube);
 
 document.addEventListener('mousedown', (event) =>{
   isDragging = true;
   startMousePosition = { x : event.clientX , y : event.clientY };
-  // console.log("starting:",startMousePosition);
 })
 
 document.addEventListener('mousemove', (event) => {
@@ -86,7 +66,6 @@ document.addEventListener('mousemove', (event) => {
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
   if (isDragging){
     currentMousePosition = { x:event.clientX , y:event.clientY};
-    // console.log("dragging to:", currentMousePosition);
     deltax = currentMousePosition.x - startMousePosition.x;
     deltay = currentMousePosition.y - startMousePosition.y;
 
@@ -101,49 +80,99 @@ document.addEventListener('mouseup', (event)=>{
   }
 });
 
-document.addEventListener('click', () => {
-  if (clickchecker(scene,camera,mouse)){
-    console.log('reached backend');
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(scene.children, true);
+document.addEventListener("click", () => {
+  const raycaster = new THREE.Raycaster();
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(scene.children, true);
+  const dialog = document.getElementById("chal_desc"); // Ensure dialog is accessible
+
+  if (intersects.length !== 0) {
     let clickedObject = intersects[0].object;
+    chal = intersects[0].object.parent;
+
     while (clickedObject.parent && !clickedObject.userData.id) {
       clickedObject = clickedObject.parent;
     }
-    console.log(`${clickedObject.userData.id}`);
-    fetch(`http://localhost:3001/api/${clickedObject.userData.id}`)
-    .then(response => response.json())
-    .then(data => {
-      const dialog = document.getElementById("chal_desc");
-      console.log(data);
+
+    console.log("Clicked Object Solved Status:", clickedObject.userData.solved);
+
+    if (clickedObject.userData.solved !== 1) {
+      const challengeId = clickedObject.userData.id;
+
+      fetch(`http://localhost:3001/api/${challengeId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Challenge Data:", data);
+
+          if (data.desc) {
+            dialog.innerHTML = `
+              <p>${data.desc}<br>Challenge link: ${data.link}</p>
+              <label for="${challengeId}">Enter flag</label>
+              <input id="${challengeId}" name="flag">
+              <button onclick="submitFlag('${challengeId}')" id="closeDialog">Enter</button>
+            `;
+          } else {
+            dialog.innerHTML = `
+              <p>This challenge is a work in progress, please give us some time.</p>
+              <button id="closeDialog">Close</button>
+            `;
+          }
+
+          dialog.showModal();
+
+          
+        });
+    } else {
+      console.log("Challenge already solved!");
       dialog.innerHTML = `
-        <p>${data.desc}<br>Challenge link: ${data.link}</p>
+        <p>You have already solved this!</p>
         <button id="closeDialog">Close</button>
       `;
-      // dialog.innerHTML = `
-      // <p> this website is a work under progress, please give us some time, we will get back to you</p>
-      // <button id="closeDialog">Close</button>
-      // `;
       dialog.showModal();
       const closebutton = document.getElementById("closeDialog");
-      closebutton.addEventListener("click", () => {
-        dialog.close();
-      });
-    });
-    
+          if (closebutton) {
+            closebutton.addEventListener("click", () => {
+              dialog.close();
+            });
+          }
+    }
+  } else {
+    console.log("Didn't click anything");
   }
 });
 
-// for (let i = 0; i < 1000; i++) {
-//   const building = new THREE.Mesh(geometry, material);
-//   building.name = 'button';
-//   building.userData.id = "1"; 
-//   building.position.set(Math.random() * 200 - 100, 0, Math.random() * 200 - 100);
-//   building.scale.set(1, Math.random() * 10 + 1, 1);
-//   city.add(building);
-// }
-// scene.add(city);
+export async function flagchecker(id, flag) {
+  console.log("trying to change the model");
+
+  try {
+    let response = await fetch("http://localhost:3001/api/checkflag", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, flag }),  // Fix: Properly structure the request body
+    });
+
+    let data = await response.json();
+    if (data.message !== "error") {
+      console.log("Success:", data.message, data.id, data.flag);
+      const position = chal.position.clone();
+      const name = chal.userData.name;
+      const id = chal.userData.id;
+      scene.remove(chal);
+      let url = `/src/models/buildings/cyberpunk/${name}`;
+      const loader = new GLTFLoader();
+      loader.load(url, function (gltf) {
+        const model = gltf.scene.children[0];
+        model.userData.solved = 1;
+        model.userData.id = id;
+        model.position.copy(position);
+        scene.add(model);
+      });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
 
 function renderScene() {
   renderer.render(scene, camera);
