@@ -31,16 +31,32 @@ catch(error){
   console.error("lighting.js",error)
 }
 console.log(2)
-
-
-const url = "/src/models/buildings/cyberpunk.glb";
-const loader = new GLTFLoader();
-
+let id = 0;
+let x = 0;
+let y = 0;
+let z = 0;
+fetch('http://localhost:3001/api/files')
+.then(response=>response.json())
+.then(data=>{
+  data.files.forEach(element => {
+    console.log(element);
+    let url = `/src/models/buildings/${element}`;
+    const loader = new GLTFLoader();
+    console.log(url);
     loader.load(url, function(gltf){
         const model = gltf.scene.children[0];
-        model.userData.id = 1;
+        id +=1
+        model.position.set(x,y,z);
+        x += 10;
+        // y += 1;
+        // z += 10;
+        model.userData.id = id;
         scene.add(model);
         const modelCount = gltf.scene.children.length;
+  });
+});
+
+
 
 
     // console.log(`Number of models in the pack: ${modelCount}`);

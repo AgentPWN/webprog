@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';  // Convert module URL to a path
 import { dockerize } from './docker.mjs'; // Import dockerize function
 import sqlite3 from 'sqlite3';
 import cors from 'cors';
+import fs from 'fs';
 
 const db = new sqlite3.Database('docker_images.db', (err) => {
     if (err) {
@@ -22,6 +23,20 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 console.log(__dirname);
 app.use(express.static(path.join(__dirname, '../../')));
 app.use('/node_modules', express.static(path.join(__dirname, '../../node_modules')));
+
+
+app.get('/api/files',async(req,res)=>{
+    const directory = path.join(__dirname,'../models/buildings');
+    fs.readdir(directory,(err,files)=>{
+        if (err){
+            return res.status(500).json({error:`unable to scan directory:${err}`});
+        }
+        else{
+            res.json({files});
+        }
+    });
+});
+
 
 app.get('/api/:id', async (req, res) => {
     try {
