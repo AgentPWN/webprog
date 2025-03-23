@@ -56,12 +56,12 @@ app.get('/api/files/cyberpunk',async(req,res)=>{
 
 app.get('/api/:id', async (req, res) => {
     try {
-        const buildingid = req.params.id;
-        console.log("Received request for:", buildingid);
+        const buildingname = req.params.id;
+        console.log("Received request for:", buildingname);
 
         db.get(
-            'SELECT docker_image, desc, link FROM docker_images WHERE id = ?',
-            [buildingid],
+            'SELECT docker_image, desc, link FROM docker_images WHERE name = ?',
+            [buildingname],
             async (err, row) => {
                 if (err) {
                     console.error('Database error:', err.message);

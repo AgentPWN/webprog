@@ -29,7 +29,8 @@ db.run(`DROP TABLE IF EXISTS docker_images`, (err) => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             docker_image TEXT NOT NULL,
             desc TEXT NOT NULL,
-            link TEXT NOT NULL
+            link TEXT NOT NULL,
+            name TEXT NOT NULL
         )
     `, (err) => {
         if (err) {
@@ -39,9 +40,9 @@ db.run(`DROP TABLE IF EXISTS docker_images`, (err) => {
 
             // Insert data
             db.run(`
-                INSERT INTO docker_images (docker_image, desc,link) 
-                VALUES (?, ?, ?)
-            `, ['nginx-cookie-sqli', "Charlie's chocolate factory has been taken over by his evil twin sister Charlize! Can you get access to her secret website?", "127.0.0.1:80"], (err) => {
+                INSERT INTO docker_images (docker_image, desc, link, name) 
+                VALUES (?, ?, ?, ?)
+            `, ['nginx-cookie-sqli', "Charlie's chocolate factory has been taken over by his evil twin sister Charlize! Can you get access to her secret website?", "127.0.0.1:80", "fire_station"], (err) => {
                 if (err) {
                     console.error('Error inserting data:', err.message);
                 } else {
