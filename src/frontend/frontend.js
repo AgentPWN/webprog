@@ -21,6 +21,14 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 let names = ["fire_station", "hospital", "hotel", "pizzeria", "bakery", "market", "coffe_shop", "green_house", "yellow_house", "cinema"];
+
+let dictionary = {};
+
+names.forEach(item => {
+    dictionary[item] = 0;
+});
+
+console.log(dictionary);
 let chal = 0;
 let dialog_open = false;
 // let city = 0;
@@ -50,7 +58,7 @@ fetch('http://localhost:3001/api/files/noncyberpunk')
             const model = child;
             model.userData.id = id;
             model.userData.name = element;
-            model.userData.solved = 0;
+            // model.userData.solved = 0;
             scene.add(model);
         });
 
@@ -113,32 +121,20 @@ document.addEventListener('keydown',(event)=>{
 document.addEventListener('keyup',(event)=>{
   clicked = true;
 });
-// document.addEventListener('mouseup', (event)=>{
-//   if (isDragging){
-//     isDragging = false;
-//   }
-// });
 
-document.addEventListener("click", () => {
+
+document.addEventListener("click", (clicked) => {
+  clicked.stopPropagation();
   const raycaster = new THREE.Raycaster();
   raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster.intersectObjects(scene.children, true);
   const dialog = document.getElementById("chal_desc"); 
   if (intersects.length !== 0) {
-    let clickedObject = intersects[0].object;
+    let clickedObject = intersects[0].object.parent;
     chal = intersects[0].object.parent;
-    // console.log(clickedObject.name);
-    // console.log(chal.name);
-    while (clickedObject.parent && clickedObject.parent.name != "Scene") {
-      // console.log(clickedObject.name);
-      clickedObject = clickedObject.parent;
-
-    }
-      console.log(clickedObject.name);
-
-    // console.log(intersects);
-    console.log("Clicked Object Solved Status:", clickedObject.userData.solved);
-    if (clickedObject.userData.solved !== 1) {
+    console.log(chal.name);
+    console.log("Clicked Object Solved Status:", dictionary[clickedObject.name]);
+    if (dictionary[clickedObject.name] !== 1) {
 
   if (names.includes(clickedObject.name)){
       const challengeId = clickedObject.name;
@@ -146,8 +142,6 @@ document.addEventListener("click", () => {
       fetch(`http://localhost:3001/api/${challengeId}`)
         .then((response) => response.json())
         .then((data) => {
-          // console.log("Challenge Data:", data);
-
           if (data.desc) {
             dialog.innerHTML = `
               <p>${data.desc}<br>Challenge link: ${data.link}</p>
@@ -156,12 +150,20 @@ document.addEventListener("click", () => {
               <button onclick="submitFlag('${challengeId}')" id="closeDialog">Enter</button>
             `;
             dialog_open = true;
+            dialog.addEventListener("click", (event) => {
+              event.stopPropagation();
+            });
+
           } else {
             dialog.innerHTML = `
               <p>This challenge is a work in progress, please give us some time.</p>
               <button id="closeDialog">Close</button>
             `;
             dialog_open = true;
+            dialog.addEventListener("click", (event) => {
+              event.stopPropagation();
+            });
+
           }
 
           dialog.showModal();
@@ -176,15 +178,19 @@ document.addEventListener("click", () => {
         
         });
     }} else {
-      // console.log("Challenge already solved!");
       dialog.innerHTML = `
         <p>You have already solved this!</p>
         <button id="closeDialog">Close</button>
       `;
       dialog.showModal();
+      dialog.addEventListener("click", (event) => {
+        event.stopPropagation();
+      });
+
       const closebutton = document.getElementById("closeDialog");
           if (closebutton) {
             closebutton.addEventListener("click", () => {
+              event.stopPropagation();
               dialog.close();
               dialog_open = false;
             });
@@ -208,7 +214,8 @@ export async function flagchecker(id, flag) {
     if (data.message != "error") {
       // console.log("Success:", data.message, data.id, data.flag);
       const position = chal.position.clone();
-      const name = chal.userData.name;
+      const orientation = chal.quaternion.clone();
+      // const name = chal.userData.name;
       const id = chal.userData.id;
       const target = city.getObjectByName(chal.name);
       if (target) {
@@ -220,32 +227,29 @@ export async function flagchecker(id, flag) {
       const loader = new GLTFLoader();
       loader.load(url, function (gltf) {
         const model = gltf.scene;
-        model.traverse((child)=>{
-          // console.log(child.name);
-          // while (child.parent) {
-          //  child = child.parent;
-          // }
-          if (child.parent){
-            child = child.parent;
-          }
-            // const model = child;
-            if (child.name===chal.name){
-              console.log(child.name);
-              console.log(chal.name);
-              child.userData.solved = 1;
-              child.userData.id = id;
-              child.position.copy(position);
-              scene.add(child);
+        let foundChild = null;
+
+        model.traverse((child) => {
+            if (child.name === chal.name) {  // Match building name
+                foundChild = child;
             }
-            //model.scale.set(scaleFactorx, scaleFactory, scaleFactorz);
-            
-          
-        
         });
 
+        if (foundChild) {
+            foundChild.userData.id = id;
+            foundChild.position.copy(position);
+            foundChild.quaternion.copy(orientation);
+            dictionary[foundChild.name] = 1;
+        } else {
+            model.position.copy(position);  // Default to whole model
+            model.quaternion.copy(orientation);
+        }
+        console.log(dictionary);
+        scene.add(foundChild);
+    });
 
         // scene.add(model);
-      });
+
     }
   } catch (error) {
     console.error("Error:", error);
