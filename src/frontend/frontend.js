@@ -12,25 +12,66 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 const mouse = new THREE.Vector2();
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 scene.background = new THREE.Color(0xffffff);
-let city = new THREE.Group();
+// let city = new THREE.Group();
+let city = 0;
 let isDragging = false;
 let startMousePosition,currentMousePosition,deltax,deltay = 0;
-camera.position.set(30, 30, 40);
-camera.lookAt(0, 0, 0);
+let right_edge = 0;
+let left_edge = 0;
+let width = 0;
+let top_edge = 0;
+let bottom_edge = 0;
+let depth = 0;
+camera.position.set(80, 50, -80);
+camera.lookAt(60, 0, -105);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
-let names = ["fire_station", "hospital", "hotel", "pizzeria", "bakery", "market", "coffe_shop", "green_house", "yellow_house", "cinema"];
+let names = ["Building_Sky_big_color01",
+             "Building_Sky_big_color01.001",
+             "Building_Sky_small_color01", 
+             "Building_Auto_Service", 
+             "Building_Bakery",
+             "Building_Bakery.001", 
+             "Building_Books_Shop", 
+             "Building_Bar", 
+             "Building_Chicken_Shop", 
+             "Building_Chicken_Shop.001", 
+             "Building_Clothing",
+             "Building_Coffee_Shop",
+             "Building_Drug_Store",
+             "Building_Drug_Store.001",
+             "Building_Factory",
+             "Building_Fast_Food",
+             "Building_Fruits_Shop",
+             "Building_Gas_Station",
+             "Building_Gift_Shop",
+             "Building_House_01_color01",
+             "Building_House_02_color01",
+             "Building_House_04_color01.001",
+             "Building_Music_Store",
+             "Building_Pizza",
+             "Building_Residential_color01",
+             "Building_Residential_color01.001",
+             "Building_Restaurant",
+             "Building_Restaurant.001",
+             "Building_Shoes_Shop",
+             "Building_Shoes_Shop.001",
+             "Building_Stadium",
+             "Building_Super_Market"             
+            ];
 
 let dictionary = {};
-
+let url = 0;
 names.forEach(item => {
     dictionary[item] = 0;
 });
-
+let position = 0;
 console.log(dictionary);
 let chal = 0;
 let dialog_open = false;
+let loader = new GLTFLoader();
+
 // let city = 0;
 try{
   lighting(scene);
@@ -47,28 +88,54 @@ fetch('http://localhost:3001/api/files/noncyberpunk')
 .then(response=>response.json())
 .then(data=>{
   data.files.forEach(element => {
-    let url = `/src/models/buildings/noncyberpunk/${element}`;
-    const loader = new GLTFLoader();
-    loader.load(url, (gltf)=>{
-        city = gltf.scene; 
-        city.traverse((child)=>{
-          if (child.parent){
-            child = child.parent;
-          }
-            const model = child;
-            model.userData.id = id;
-            model.userData.name = element;
-            // model.userData.solved = 0;
-            scene.add(model);
-        });
+    url = `/src/models/buildings/noncyberpunk/${element}`;
+    // loader = new GLTFLoader();
+    const cityGroup = new THREE.Group();
+
+loader.load(url, (gltf) => {
+    city = gltf.scene;
+    
+    // Compute bounding box to get the city dimensions
+    const bbox = new THREE.Box3().setFromObject(city);
+    width = bbox.max.x - bbox.min.x;
+    depth = bbox.max.z - bbox.min.z;
+
+    // Center the original city
+    city.position.set(0, 0, 0);
+    cityGroup.add(city);
+
+    // Clone city and place it at four edges
+    const positions = [
+        [width, 0, 0],    // Right
+        [-width, 0, 0],   // Left
+        [0, 0, depth],    // Front
+        [0, 0, -depth],
+        [width, 0, -depth],    // Right
+        [-width, 0, depth],   // Left
+        [width, 0, depth],    // Front
+        [-width, 0, -depth],
+    ];
+    // bottom_edge -= depth;
+    top_edge += depth;
+    // left_edge -= width;
+    right_edge += width;
+
+    positions.forEach(pos => {
+        const clone = city.clone();
+        clone.position.set(...pos);
+        cityGroup.add(clone);
+    });
+
+    scene.add(cityGroup);
 
   });
 });
 
     });
+let radius = 0;
 const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
 
-let  movementSpeed = 2;
+let  movementSpeed = 1;
 document.addEventListener('mousedown', (event) =>{
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -76,51 +143,129 @@ document.addEventListener('mousedown', (event) =>{
   startMousePosition = { x : event.clientX , y : event.clientY };
 })
 
-// document.addEventListener('mousemove', (event) => {   
-//   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-//   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-//   if (isDragging){
-//     currentMousePosition = { x:event.clientX , y:event.clientY};
-//     deltax = currentMousePosition.x - startMousePosition.x;
-//     deltay = currentMousePosition.y - startMousePosition.y;
-
-//     camera.position.x += (deltax)*0.01;
-//     camera.position.z += (deltay)*0.03;
-//   }
-// });
-let radius = camera.position.length();
-let angle = 1;
 let clicked = true;
-document.addEventListener('keydown',(event)=>{
-  if (dialog_open == false){
-  if (clicked==true){
-    radius = camera.position.length();
-    clicked = false;
+function isPositionOccupied(position, tolerance = 0.1) {
+  return scene.children.some(obj => {
+      if (obj.position) {
+          return obj.position.distanceTo(position) < tolerance;
+      }
+      return false;
+  });
+}
+document.addEventListener("keydown", (event) => {
+  if (!dialog_open) {
+      if (clicked) {
+          radius = camera.position.length();
+          clicked = false;
+      }
+
+      // Move camera
+      if (event.key == "w") camera.position.z -= movementSpeed;
+      if (event.key == "s") camera.position.z += movementSpeed;
+      if (event.key == "a") camera.position.x -= movementSpeed;
+      if (event.key == "d") camera.position.x += movementSpeed;
+
+      // Check if camera has moved beyond edges
+      if (camera.position.x > Math.abs(left_edge) || camera.position.z > Math.abs(top_edge)) {
+          expandCity();
+      }
   }
-  // console.log(event.key);
-  if (event.key == "w") camera.position.z -= movementSpeed;
-  if (event.key == "s") camera.position.z += movementSpeed;
-  if (event.key == "a") camera.position.x -= movementSpeed;
-  if (event.key == "d") camera.position.x += movementSpeed;
-//   if (event.key == "q") {
-//     camera.position.x = radius * Math.cos(angle);
-//     camera.position.z = radius * Math.sin(angle);
-//     angle += 0.05; // Speed of rotation
-//     camera.lookAt(0, 0, 0);
-//   }
-//   if (event.key == "e") {
-//     // radius = camera.position.length();
-//     camera.position.x = radius * Math.cos(angle);
-//     camera.position.z = radius * Math.sin(angle);
-//     angle -= 0.05; // Speed of rotation
-//     camera.lookAt(0, 0, 0);
-//   }
+});
+
+// Pooling mechanism to reuse city blocks instead of creating new ones
+const cityPool = [];
+const maxBlocks = 100; // Maximum number of city blocks in the scene
+
+function getCityBlock() {
+  if (cityPool.length > 0) {
+      const block = cityPool.pop();
+      block.visible = true;
+      return block;
+  } else {
+      return city.clone();
   }
-  
+}
+
+function releaseCityBlock(block) {
+  block.visible = false;
+  cityPool.push(block);
+}
+
+function expandCity() {
+  const cityGroup = new THREE.Group();
+  let newPositions = [];
+
+  if (camera.position.x > right_edge /*&& !isPositionOccupied(new THREE.Vector3(right_edge + width, 0, top_edge - depth))*/) {
+      console.log("right");
+      newPositions = [
+          [right_edge + width, 0, top_edge],
+          [right_edge + width, 0, top_edge - depth],
+          [right_edge + width, 0, bottom_edge],
+      ];
+      right_edge += width;
+      left_edge += width;
+  } if (camera.position.z > top_edge /*&& !isPositionOccupied(new THREE.Vector3(right_edge - width, 0, top_edge + depth))*/) {
+      console.log("up");
+      newPositions = [
+          [right_edge, 0, top_edge + depth],
+          [left_edge, 0, top_edge + depth],
+          [right_edge - width, 0, top_edge + depth],
+      ];
+      top_edge += depth;
+      bottom_edge += depth;
+  } if (camera.position.z < bottom_edge /*&& !isPositionOccupied(new THREE.Vector3(right_edge - width, 0, bottom_edge - depth))*/) {
+      console.log("down");
+      newPositions = [
+          [right_edge - width, 0, bottom_edge - depth],
+          [right_edge, 0, bottom_edge - depth],
+          [left_edge, 0, bottom_edge - depth],
+      ];
+      top_edge -= depth;
+      bottom_edge -= depth;
+  } if (camera.position.x < left_edge /*&& !isPositionOccupied(new THREE.Vector3(left_edge - width, 0, top_edge - depth))*/) {
+      console.log("left");
+      newPositions = [
+          [left_edge - width, 0, top_edge],
+          [left_edge - width, 0, top_edge - depth],
+          [left_edge - width, 0, bottom_edge],
+      ];
+      right_edge -= width;
+      left_edge -= width;
+      console.log(left_edge, width, right_edge);
+  }
+
+  // Add new city blocks from pool
+  newPositions.forEach((pos) => {
+      const block = getCityBlock();
+      block.position.set(...pos);
+      cityGroup.add(block);
+  });
+
+  scene.add(cityGroup);
+
+  // Remove distant city blocks to prevent lag
+  // removeDistantBlocks();
+}
+
+// function removeDistantBlocks() {
+//   while (scene.children.length > maxBlocks) {
+//       const oldestBlock = scene.children[0];
+//       scene.remove(oldestBlock);
+//       releaseCityBlock(oldestBlock);
+//   }
+// }
+
+        
+        // Ensure infinite looping
+// Function to get the city size dynamically
+
+
+
+document.addEventListener('keyup', () => {
+    clicked = true;
 });
-document.addEventListener('keyup',(event)=>{
-  clicked = true;
-});
+
+
 
 
 document.addEventListener("click", (clicked) => {
@@ -130,8 +275,8 @@ document.addEventListener("click", (clicked) => {
   const intersects = raycaster.intersectObjects(scene.children, true);
   const dialog = document.getElementById("chal_desc"); 
   if (intersects.length !== 0) {
-    let clickedObject = intersects[0].object.parent;
-    chal = intersects[0].object.parent;
+    let clickedObject = intersects[0].object;
+    chal = intersects[0].object;
     console.log(chal.name);
     console.log("Clicked Object Solved Status:", dictionary[clickedObject.name]);
     if (dictionary[clickedObject.name] !== 1) {
@@ -195,10 +340,9 @@ document.addEventListener("click", (clicked) => {
               dialog_open = false;
             });
           }
-    }}
-  
-  
+    }}  
 });
+function infinity(){}
 
 export async function flagchecker(id, flag) {
   // console.log("trying to change the model");
@@ -259,6 +403,7 @@ export async function flagchecker(id, flag) {
 
 function renderScene() {
   renderer.render(scene, camera);
+  // console.log(camera.position.x);
 
 }
 renderer.setAnimationLoop(renderScene);
