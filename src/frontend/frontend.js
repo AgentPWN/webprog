@@ -97,8 +97,8 @@ loader.load(url, (gltf) => {
     
     // Compute bounding box to get the city dimensions
     const bbox = new THREE.Box3().setFromObject(city);
-    width = bbox.max.x - bbox.min.x;
-    depth = bbox.max.z - bbox.min.z;
+    width = bbox.max.x - bbox.min.x-1;
+    depth = bbox.max.z - bbox.min.z-1;
 
     // Center the original city
     city.position.set(0, 0, 0);
@@ -106,18 +106,22 @@ loader.load(url, (gltf) => {
 
     // Clone city and place it at four edges
     const positions = [
-        [width, 0, 0],    // Right
-        [-width, 0, 0],   // Left
-        [0, 0, depth],    // Front
+        [width, 0, 0],
+        [-width, 0, 0],
+        [-2*width, 0, 0],
+
+        [0, 0, depth],
         [0, 0, -depth],
-        [width, 0, -depth],    // Right
-        [-width, 0, depth],   // Left
-        [width, 0, depth],    // Front
+        [0, 0, -2*depth],
+
+        [width, 0, -depth],
+        [-width, 0, depth],
+        [width, 0, depth],
         [-width, 0, -depth],
     ];
-    // bottom_edge -= depth;
+    // bottom_edge += depth;
     top_edge += depth;
-    // left_edge -= width;
+    // left_edge += width;
     right_edge += width;
 
     positions.forEach(pos => {
@@ -135,7 +139,7 @@ loader.load(url, (gltf) => {
 let radius = 0;
 const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
 
-let  movementSpeed = 1;
+let  movementSpeed = 2;
 document.addEventListener('mousedown', (event) =>{
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -166,8 +170,8 @@ document.addEventListener("keydown", (event) => {
       if (event.key == "d") camera.position.x += movementSpeed;
 
       // Check if camera has moved beyond edges
-      if (camera.position.x > Math.abs(left_edge) || camera.position.z > Math.abs(top_edge)) {
-          expandCity();
+      if (camera.position.x <= left_edge || camera.position.z >= top_edge || camera.position.x >= right_edge || camera.position.z <= bottom_edge) {
+        expandCity();
       }
   }
 });
@@ -194,40 +198,86 @@ function releaseCityBlock(block) {
 function expandCity() {
   const cityGroup = new THREE.Group();
   let newPositions = [];
-
-  if (camera.position.x > right_edge /*&& !isPositionOccupied(new THREE.Vector3(right_edge + width, 0, top_edge - depth))*/) {
+  //console.log(left_edge);
+  // console.log(camera.position.x);
+  if (camera.position.x >= right_edge /*&& !isPositionOccupied(new THREE.Vector3(right_edge + width, 0, top_edge - depth))*/) {
       console.log("right");
       newPositions = [
-          [right_edge + width, 0, top_edge],
-          [right_edge + width, 0, top_edge - depth],
-          [right_edge + width, 0, bottom_edge],
+        //[left_edge,0,bottom_edge],
+        //[left_edge,0,top_edge-depth],
+        //[left_edge,0, top_edge],
+        //[right_edge, 0, bottom_edge],
+
+        //[right_edge, 0, top_edge],
+        //[left_edge-width, 0, top_edge + depth],
+        //[left_edge, 0, top_edge + depth],
+        //[right_edge+width, 0, top_edge+depth],
+        [right_edge, 0, top_edge+depth],
+
+        [left_edge+width, 0, top_edge+depth],
+        //[right_edge, 0, top_edge],
+        [right_edge + width, 0, top_edge],
+        [right_edge + width, 0, top_edge - depth],
+        [right_edge + width, 0, bottom_edge]
       ];
       right_edge += width;
       left_edge += width;
-  } if (camera.position.z > top_edge /*&& !isPositionOccupied(new THREE.Vector3(right_edge - width, 0, top_edge + depth))*/) {
+  } if (camera.position.z >= top_edge /*&& !isPositionOccupied(new THREE.Vector3(right_edge - width, 0, top_edge + depth))*/) {
       console.log("up");
       newPositions = [
-          [right_edge, 0, top_edge + depth],
-          [left_edge, 0, top_edge + depth],
-          [right_edge - width, 0, top_edge + depth],
+        //[left_edge,0,top_edge-depth],
+        //[right_edge,0,top_edge-width],
+        //[right_edge-width,0,top_edge-width],
+        //[right_edge,0,top_edge],
+        //[left_edge,0,top_edge],
+        //[right_edge-width,0,top_edge],
+        [right_edge, 0, top_edge + depth],
+        [left_edge, 0, top_edge + depth],
+        [left_edge-width, 0, top_edge + depth],
+        [right_edge - width, 0, top_edge + depth],
+        [right_edge, 0, top_edge + 2*depth],
+        [left_edge, 0, top_edge + 2*depth],
+        [right_edge - width, 0, top_edge + 2*depth],
+        [left_edge-width, 0, top_edge + 2*depth],
+
       ];
       top_edge += depth;
       bottom_edge += depth;
-  } if (camera.position.z < bottom_edge /*&& !isPositionOccupied(new THREE.Vector3(right_edge - width, 0, bottom_edge - depth))*/) {
+  } if (camera.position.z <= bottom_edge /*&& !isPositionOccupied(new THREE.Vector3(right_edge - width, 0, bottom_edge - depth))*/) {
       console.log("down");
       newPositions = [
-          [right_edge - width, 0, bottom_edge - depth],
-          [right_edge, 0, bottom_edge - depth],
-          [left_edge, 0, bottom_edge - depth],
+        //[left_edge+width,0,bottom_edge+depth],
+        //[left_edge+width,0,bottom_edge+depth],
+        //[left_edge,0,bottom_edge+depth],
+        //[left_edge+width,0,bottom_edge],
+        //[left_edge+width,0,bottom_edge],
+        [left_edge-width,0,bottom_edge-depth],
+        [right_edge - width, 0, bottom_edge - depth],
+        [right_edge, 0, bottom_edge - depth],
+        [left_edge, 0, bottom_edge - depth]
       ];
       top_edge -= depth;
       bottom_edge -= depth;
-  } if (camera.position.x < left_edge /*&& !isPositionOccupied(new THREE.Vector3(left_edge - width, 0, top_edge - depth))*/) {
+  } if (camera.position.x <= left_edge /*&& !isPositionOccupied(new THREE.Vector3(left_edge - width, 0, top_edge - depth))*/) {
       console.log("left");
       newPositions = [
-          [left_edge - width, 0, top_edge],
-          [left_edge - width, 0, top_edge - depth],
-          [left_edge - width, 0, bottom_edge],
+        //[left_edge + width, 0, top_edge],
+        //[left_edge + width, 0, top_edge - depth],
+        //[left_edge + width, 0, bottom_edge],
+        [left_edge - 2*width, 0, top_edge],
+        [left_edge - 2*width, 0, top_edge - depth],
+        [left_edge - 2*width, 0, bottom_edge-depth],
+        [left_edge - 2*width, 0, top_edge+depth],
+        [left_edge, 0, top_edge],
+        [left_edge, 0, top_edge+depth],
+        //[left_edge, 0, top_edge - depth],
+        [left_edge, 0, bottom_edge-depth],
+        [left_edge - width, 0, top_edge],
+        [left_edge - width, 0, top_edge - depth],
+        [left_edge - width, 0, bottom_edge-depth],
+        [left_edge - 2*width, 0, top_edge+depth],
+
+
       ];
       right_edge -= width;
       left_edge -= width;
