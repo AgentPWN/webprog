@@ -139,7 +139,7 @@ loader.load(url, (gltf) => {
 let radius = 0;
 const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
 
-let  movementSpeed = 2;
+let  movementSpeed = 1;
 document.addEventListener('mousedown', (event) =>{
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -417,7 +417,7 @@ export async function flagchecker(id, flag) {
         scene.remove(target);
       }
       
-      let url = `/src/models/buildings/cyberpunk/bakery.glb`;
+      let url = `/src/models/buildings/cyberpunk/cyberpunk.glb`;
       const loader = new GLTFLoader();
       loader.load(url, function (gltf) {
         const model = gltf.scene;

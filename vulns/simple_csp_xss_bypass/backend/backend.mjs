@@ -19,7 +19,13 @@ const db = new sqlite3.Database('bug_reports.db', (err) => {
         console.log('Connected to SQLite database');
     }
 });
-
+db.run(`DROP TABLE IF EXISTS bug_reports`, (err) => {
+    if (err) {
+        console.error('Error dropping table:', err.message);
+    } else {
+        console.log('Existing table dropped successfully.');
+    }
+});
 db.run(`
     CREATE TABLE IF NOT EXISTS bug_reports (
         name TEXT NOT NULL PRIMARY KEY,

@@ -42,7 +42,7 @@ db.run(`DROP TABLE IF EXISTS docker_images`, (err) => {
             db.run(`
                 INSERT INTO docker_images (docker_image, desc, link, name) 
                 VALUES (?, ?, ?, ?)
-            `, ['nginx-cookie-sqli', "Charlie's chocolate factory has been taken over by his evil twin sister Charlize! Can you get access to her secret website?", "127.0.0.1:80", "fire_station"], (err) => {
+            `, ['nginx-cookie-sqli', "Charlie's chocolate factory has been taken over by his evil twin sister Charlize! Can you get access to her secret website?", "127.0.0.1:80", "Building_Stadium"], (err) => {
                 if (err) {
                     console.error('Error inserting data:', err.message);
                 } else {
