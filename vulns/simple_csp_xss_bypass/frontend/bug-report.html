@@ -71,7 +71,7 @@
 <div class="report-container">
     <input type="text" id="reporter-name" placeholder="Your Name" required>
     <textarea id="bug-details" placeholder="Describe the bug..."></textarea>
-    <button onclick="submitBug()">Submit Report</button>
+    <button onclick="report_bugs()">Submit Report</button>
 </div>
 
 <h2>📜 Reported Issues</h2>
@@ -79,10 +79,11 @@
 <a href="/reports.html" ><button>click me</button></a>
 <script nonce="abcde">
     function report_bugs(){
-        let report = document.getElementById("bug");
+        let report = document.getElementById("bug-details");
         let value = report.value;
-        let name = document.getElementById('name');
+        let name = document.getElementById('reporter-name');
         let data = name.value;
+        console.log(value);
         fetch("/api/bug_report",{
             method:"POST",
             headers:{

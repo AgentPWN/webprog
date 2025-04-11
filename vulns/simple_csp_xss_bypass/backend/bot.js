@@ -4,9 +4,9 @@ const path = require('path');
 
 const CONFIG = {
     APPNAME: process.env['APPNAME'] || "Admin",
-    APPURL: process.env['APPURL'] || "http://172.17.0.1",
+    APPURL: process.env['APPURL'] || "http://localhost",
     APPURLREGEX: process.env['APPURLREGEX'] || "^.*$",
-    APPFLAG: process.env['APPFLAG'] || "yooyyiyiyiyiiyi",
+    APPFLAG: process.env['APPFLAG'] || "flag{d4mn_you_kn0w_how_Xs5_w0rk5}",
     APPLIMITTIME: Number(process.env['APPLIMITTIME'] || "60"),
     APPLIMIT: Number(process.env['APPLIMIT'] || "5"),
     APPEXTENSIONS: (() => {

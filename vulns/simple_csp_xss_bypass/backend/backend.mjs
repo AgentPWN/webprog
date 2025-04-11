@@ -51,10 +51,15 @@ app.post('/api/bug_report', (req, res) => {
         res.status(201).json({ id: this.lastID, name, message });
     });
 
-    // Assuming bot.js has a function `report()` that you want to call
     import('./bot.js').then((botModule) => {
-    // Ensure the report function is defined in bot.js
+        const module = botModule.default || botModule;
+        const urlToVisit = 'http://localhost:2001/reports.html'; // Replace with your target URL
+        
+        module.bot(urlToVisit)
+            .then(result => console.log('Bot completed with result:', result))
+            .catch(err => console.error('Error running bot:', err));
     }).catch(err => console.error('Error importing bot module:', err));
+    
 });
 
 app.get('/api/reports', (req, res) => {
