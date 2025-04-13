@@ -41,8 +41,11 @@ db.run(`DROP TABLE IF EXISTS docker_images`, (err) => {
             // Insert data
             db.run(`
                 INSERT INTO docker_images (docker_image, desc, link, name) 
-                VALUES (?, ?, ?, ?)
-            `, ['nginx-cookie-sqli', "Charlie's chocolate factory has been taken over by his evil twin sister Charlize! Can you get access to her secret website?", "127.0.0.1:80", "Building_Stadium"], (err) => {
+                VALUES 
+                    ('nginx-cookie-sqli', "Charlie's chocolate factory has been taken over by his evil twin sister Charlize! Can you get access to her secret website?", "127.0.0.1:80", "Building_Stadium"),
+                    ('none-alg-jwt', "JWTs are very secure right, they don't have any weird algorithms you can use right? RIGHT?", "127.0.0.1:5000", "Building_Bakery001"),
+                    ('weak-jwt-secret', "Did you know JWTs have secrets too?", "127.0.0.1:5001", "Building_Gas_Station")
+            `, (err) => {
                 if (err) {
                     console.error('Error inserting data:', err.message);
                 } else {

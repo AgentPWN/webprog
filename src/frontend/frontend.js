@@ -32,11 +32,11 @@ let names = ["Building_Sky_big_color01",
              "Building_Sky_small_color01", 
              "Building_Auto_Service", 
              "Building_Bakery",
-             "Building_Bakery.001", 
+             "Building_Bakery001", 
              "Building_Books_Shop", 
              "Building_Bar", 
              "Building_Chicken_Shop", 
-             "Building_Chicken_Shop.001", 
+             "Building_Chicken_Shop001", 
              "Building_Clothing",
              "Building_Coffee_Shop",
              "Building_Drug_Store",
@@ -48,15 +48,15 @@ let names = ["Building_Sky_big_color01",
              "Building_Gift_Shop",
              "Building_House_01_color01",
              "Building_House_02_color01",
-             "Building_House_04_color01.001",
+             "Building_House_04_color01001",
              "Building_Music_Store",
              "Building_Pizza",
              "Building_Residential_color01",
-             "Building_Residential_color01.001",
+             "Building_Residential_color01001",
              "Building_Restaurant",
-             "Building_Restaurant.001",
+             "Building_Restaurant001",
              "Building_Shoes_Shop",
-             "Building_Shoes_Shop.001",
+             "Building_Shoes_Shop001",
              "Building_Stadium",
              "Building_Super_Market"             
             ];
@@ -190,10 +190,10 @@ function getCityBlock() {
   }
 }
 
-function releaseCityBlock(block) {
-  block.visible = false;
-  cityPool.push(block);
-}
+// function releaseCityBlock(block) {
+//   block.visible = false;
+//   cityPool.push(block);
+// }
 
 function expandCity() {
   const cityGroup = new THREE.Group();
@@ -392,29 +392,27 @@ document.addEventListener("click", (clicked) => {
           }
     }}  
 });
-function infinity(){}
 
 export async function flagchecker(id, flag) {
-  // console.log("trying to change the model");
-
   try {
     let response = await fetch("http://localhost:3001/api/checkflag", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, flag }),  // Fix: Properly structure the request body
+      body: JSON.stringify({ id, flag }),
     });
 
     let data = await response.json();
     if (data.message != "error") {
-      // console.log("Success:", data.message, data.id, data.flag);
       const position = chal.position.clone();
       const orientation = chal.quaternion.clone();
-      // const name = chal.userData.name;
       const id = chal.userData.id;
-      const target = city.getObjectByName(chal.name);
+      const targetName = chal.name; // Store the name for later use
+      
+      // Remove old model from city and scene
+      const target = city.getObjectByName(targetName);
       if (target) {
-        target.removeFromParent();
-        scene.remove(target);
+        city.remove(target); // Remove from city first
+        scene.remove(target); // Then remove from scene
       }
       
       let url = `/src/models/buildings/cyberpunk/cyberpunk.glb`;
@@ -424,26 +422,24 @@ export async function flagchecker(id, flag) {
         let foundChild = null;
 
         model.traverse((child) => {
-            if (child.name === chal.name) {  // Match building name
-                foundChild = child;
-            }
+          if (child.name === targetName) {
+            foundChild = child;
+          }
         });
 
-        if (foundChild) {
-            foundChild.userData.id = id;
-            foundChild.position.copy(position);
-            foundChild.quaternion.copy(orientation);
-            dictionary[foundChild.name] = 1;
-        } else {
-            model.position.copy(position);  // Default to whole model
-            model.quaternion.copy(orientation);
-        }
+        const newModel = foundChild || model;
+        newModel.userData.id = id;
+        newModel.position.copy(position);
+        newModel.quaternion.copy(orientation);
+        newModel.name = targetName; // Ensure the name is preserved
+        
+        // Add to both city and scene
+        city.add(newModel);
+        scene.add(newModel);
+        
+        dictionary[newModel.name] = 1;
         console.log(dictionary);
-        scene.add(foundChild);
-    });
-
-        // scene.add(model);
-
+      });
     }
   } catch (error) {
     console.error("Error:", error);

@@ -5,8 +5,8 @@ export async function dockerize(image) {
 
     const imagePortMap = {
         'nginx-cookie-sqli': { exposedPort: '5000/tcp', hostPort: '80' },
-        chal2: { exposedPort: '8080/tcp', hostPort: '8081' },
-        chal3: { exposedPort: '3000/tcp', hostPort: '3001' },
+        'weak-jwt-secret': { exposedPort: '5001/tcp', hostPort: '5001' },
+        'none-alg-jwt': { exposedPort: '5000/tcp', hostPort: '5000' },
     };
 
     const portConfig = imagePortMap[image];

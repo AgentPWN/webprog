@@ -71,7 +71,7 @@ app.get('/api/:id', async (req, res) => {
                 if (!row) {
                     return res.status(404).json({ error: 'Image not found' });
                 }
-
+                // console.log(row.docker_image)
                 console.log('Image found:', row.docker_image);
 
                 // Send JSON response first
