@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response, render_template
 import jwt
 import datetime
 from functools import wraps
@@ -12,18 +12,11 @@ FLAG = "flag{jwt_n0n3_4lg0_byp4ss_1s_d4ng3r0us}"
 # Mock user database
 users = {
     "regular_user": {"password": "password123", "role": "user"},
-    "admin": {"password": "admin123", "role": "admin"}
+    "admin": {"password": "admin123_@*$U)@#)@*$(*$)_)(#@!CHIUXJ(@*JE))", "role": "admin"}
 }
 @app.route('/')
 def home():
-    return """
-    <h1>JWT None Algorithm Challenge</h1>
-    <p>Endpoints:</p>
-    <ul>
-        <li><code>POST /login</code> - Get a JWT token</li>
-        <li><code>GET /admin</code> - Admin panel (requires JWT)</li>
-    </ul>
-    """
+    return render_template("index.html")
 
 def generate_token(username):
     """Generate JWT token for authenticated users"""
@@ -39,12 +32,14 @@ def generate_token(username):
     
     return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    """Login endpoint that issues JWTs"""
-    data = request.get_json()
-    username = data.get("username")
-    password = data.get("password")
+    if request.method == 'GET':
+        return render_template('login.html')
+
+    # POST method: handle login
+    username = request.form.get("username")
+    password = request.form.get("password")
     
     if not username or not password:
         return jsonify({"error": "Username and password required"}), 400
@@ -76,10 +71,7 @@ def admin():
         if decoded.get("role") != "admin":
             return jsonify({"error": "Forbidden: Admin access required"}), 403
             
-        return jsonify({
-            "message": "Welcome admin!",
-            "flag": FLAG
-        })
+        return render_template("admin.html",content= FLAG)
         
     except jwt.exceptions.DecodeError:
         return jsonify({"error": "Invalid token"}), 401
