@@ -1,0 +1,10 @@
+>>> SYSTEM BREACH INITIATED <<<
+Welcome, Operative.
+Your mission (should you choose to accept it):
+- Infiltrate the file system.
+- Locate the hidden secrets.
+- Profit.
+
+Hint: Not all files want to be found. Some hide very well...
+Maybe something called 'flag.txt' is worth peeking at? 🕵️‍♂️
+Good luck. Or don't. ¯\_(ツ)_/¯

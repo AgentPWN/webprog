@@ -1,11 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Robots Exclusion Zone</title>
+  <meta charset="UTF-8">
+  <title>Welcome to Our Normal Website</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background-color: #000;
+      color: #ccc;
+      font-family: monospace;
+      padding: 2rem;
+    }
+    .highlight {
+      color: #0ff;
+      font-weight: bold;
+    }
+    .warning {
+      color: #f00;
+    }
+    .terminal {
+      border-left: 3px solid #888;
+      padding-left: 1rem;
+      margin-top: 2rem;
+    }
+    a {
+      color: #f0f;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .redacted {
+      background-color: #444;
+      color: #444;
+      user-select: none;
+      cursor: default;
+    }
+    .redacted:hover {
+      color: #0f0;
+    }
+    hr {
+      border-color: #444;
+      margin: 2rem 0;
+    }
+  </style>
 </head>
 <body>
-    <h1>Welcome to our website!</h1>
-    <p>Nothing to see here, just a normal website...</p>
-    <!-- Hint: Our web crawler configuration might be interesting -->
+  <h1>🤖 Hello Totally Not A Robot</h1>
+  <p>Welcome to the most secure, boring, and totally <span class="highlight">uninteresting</span> website on the internet.</p>
+
+  <p>There is <span class="highlight">absolutely no need</span> to check our <a href="/robots.txt">robots.txt</a> file.</p>
+  <p>That file is for <em>robots</em>, not nosey humans with too much time and a suspicious lack of social life.</p>
+
+  <hr>
+
+  <h2>📄 About This Site</h2>
+  <p>This site is built for:</p>
+  <ul>
+    <li>Displaying highly classified <span class="redacted">██████████</span></li>
+    <li>Definitely not hiding a flag in a disallowed path</li>
+    <li>Looking innocent while being deeply suspicious</li>
+    <li>Making you overthink everything</li>
+  </ul>
+
+  <div class="terminal">
+    <p><strong># Pro tip:</strong> The best places to hide things are the ones that ask you not to look.</p>
+    <p><code>User-agent: *</code> should mean something to you. Or not. Whatever.</p>
+    <p>We've carefully curated <span class="warning">one entire line</span> of robots.txt just to mislead you. Or is it a double bluff?</p>
+  </div>
+
+  <hr>
+
+  <h2>🛡️ Security Notice</h2>
+  <p>If you're seeing this message, congratulations: you have successfully accessed a static HTML page that does <span class="highlight">literally nothing</span>.</p>
+  <p>There is no admin panel. No login form. No suspicious directory full of secrets. <span class="highlight">Stop looking.</span></p>
+
+  <p class="redacted">FLAG{nothing_to_see_here_move_along}</p>
+
+  <hr>
+
+  <p><em>This site proudly runs on caffeine, paranoia, and fake security layers.</em></p>
 </body>
 </html>

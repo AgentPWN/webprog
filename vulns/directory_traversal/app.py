@@ -1,4 +1,4 @@
-from flask import Flask, request, abort
+from flask import Flask, request, render_template, abort
 import os
 
 app = Flask(__name__)
@@ -15,7 +15,7 @@ def index():
     try:
         with open(f'./files/{file}', 'r') as f:
             content = f.read()
-        return f"File: {file}<br><pre>{content}</pre>"
+        return render_template("file.html", file=file, content=content)
     except FileNotFoundError:
         return "File not found!", 404
     except Exception:
@@ -24,5 +24,15 @@ def index():
 if __name__ == '__main__':
     os.makedirs('./files', exist_ok=True)
     with open('./files/welcome.txt', 'w') as f:
-        f.write("Hello! Try reading other files or you can try reading flag.txt")
+        f.write(
+            ">>> SYSTEM BREACH INITIATED <<<\n"
+            "Welcome, Operative.\n"
+            "Your mission (should you choose to accept it):\n"
+            "- Infiltrate the file system.\n"
+            "- Locate the hidden secrets.\n"
+            "- Profit.\n\n"
+            "Hint: Not all files want to be found. Some hide very well...\n"
+            "Maybe something called 'flag.txt' is worth peeking at? 🕵️‍♂️\n"
+            "Good luck. Or don't. ¯\\_(ツ)_/¯"
+        )
     app.run(host='0.0.0.0', port=5000)
