@@ -1,24 +1,24 @@
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response, render_template
 import jwt
 import datetime
 
 app = Flask(__name__)
+FLAG = "flag{y0u_br0k3_7h3_jw7}"
 
 SECRET_KEY = "secret"  # <-- intentionally weak!
 
 @app.route('/')
 def home():
-    return "    ."
-
-@app.route('/login', methods=['GET'])
-def login():
     token = jwt.encode({
         'user': 'guest',
         'role': 'user',
         'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
     }, SECRET_KEY, algorithm='HS256')
 
-    return jsonify({'token': token})
+    resp = make_response(render_template("index.html"))
+    resp.set_cookie('token', token, httponly=True, samesite='Lax')
+    return resp
+
 
 @app.route('/admin', methods=['GET'])
 def admin():
@@ -30,7 +30,7 @@ def admin():
     try:
         data = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
         if data['role'] == 'admin':
-            return jsonify({'message': 'Congrats! Here is your flag: flag{y0u_br0k3_7h3_jw7}'})
+            return render_template("admin.html",content= FLAG)
         else:
             return jsonify({'message': 'You must be admin to access this!'}), 403
     except Exception as e:
