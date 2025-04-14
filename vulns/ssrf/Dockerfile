@@ -6,7 +6,6 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
-ENV FLAG=flag{jwt_n0n3_4lg0_byp4ss_1s_d4ng3r0us}
 
 # Create and set working directory
 WORKDIR /app
@@ -15,10 +14,11 @@ WORKDIR /app
 RUN pip install --no-cache-dir flask pyjwt
 
 # Copy application files
-COPY app.py /app/
+COPY . /app/
 
 # Expose the port the app runs on
-EXPOSE 5000
+EXPOSE 5002 
+EXPOSE 5008
 
 # Set non-root user
 RUN useradd -m ctfuser && chown -R ctfuser:ctfuser /app
@@ -26,3 +26,4 @@ USER ctfuser
 
 # Command to run the application
 CMD ["python", "app.py"]
+CMD ["python", "server.py"]

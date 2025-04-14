@@ -13,10 +13,10 @@ WORKDIR /app
 RUN pip install --no-cache-dir flask pyjwt
 
 # Copy application files
-COPY app.py /app/
+COPY . /app/
 
 # Expose the port the app runs on
-EXPOSE 5000
+EXPOSE 5005
 
 # Set non-root user
 RUN useradd -m ctfuser && chown -R ctfuser:ctfuser /app

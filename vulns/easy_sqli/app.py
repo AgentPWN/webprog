@@ -1,7 +1,7 @@
-from flask import Flask, render_template_string, request
+from flask import Flask, render_template, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 import sqlite3
-
+FLAG = "flag{1t'5_alm057_t0_e45y}"
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ctf.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -18,9 +18,9 @@ def init_db():
         db.create_all()
         if not User.query.filter_by(username='admin').first():
             admin = User(username='admin', password='supersecretpassword123')
-            guest = User(username='guest', password='password123')
+            # guest = User(username='guest', password='password123')
             db.session.add(admin)
-            db.session.add(guest)
+            # db.session.add(guest)
             db.session.commit()
 
 init_db()
@@ -42,25 +42,16 @@ def login():
             conn.close()
             
             if user:
-                response = f"<h1>Welcome, {user[1]}!</h1>"
+                # response = f"<h1>Welcome, {user[1]}!</h1>"
                 if user[1] == 'admin':
-                    response += "<p>FLAG: flag{1t'5_alm057_t0_e45y}</p>"
-                else:
-                    response += "<p>Regular user access</p>"
-                return response
+                    return render_template("admin.html", content=FLAG)
             else:
-                return "<p>Invalid credentials</p>"
+                return render_template("index.html")
         except Exception as e:
             conn.close()
             return f"<p>Error: {str(e)}</p>"
     
-    return render_template_string('''
-        <form method="POST">
-            Username: <input type="text" name="username"><br>
-            Password: <input type="password" name="password"><br>
-            <input type="submit" value="Login">
-        </form>
-    ''')
+    return render_template("index.html")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port = 5004)

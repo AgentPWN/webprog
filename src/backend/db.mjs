@@ -44,6 +44,10 @@ db.run(`DROP TABLE IF EXISTS docker_images`, (err) => {
                 VALUES 
                     ('nginx-cookie-sqli', "Charlie's chocolate factory has been taken over by his evil twin sister Charlize! Can you get access to her secret website?", "127.0.0.1:80", "Building_Stadium"),
                     ('none-alg-jwt', "JWTs are very secure right, they don't have any weird algorithms you can use right? RIGHT?", "127.0.0.1:5000", "Building_Bakery001"),
+                    ('ssrf', "I am sure it is secure to visit other urls. My server should be fine", "127.0.0.1:5002", "Building_Gift_Shop"),
+                    ('robots', "Do you think web crawlers can visit every endpoint of a website?", "127.0.0.1:5003", "Building_Residential_color01"),
+                    ('easy_sqli', "Do you like injections?", "127.0.0.1:5004", "Building_Factory"),
+                    ('directory_traversal', "Can you directly traverse this website?", "127.0.0.1:5005", "Building_Coffee_Shop"),
                     ('weak-jwt-secret', "Did you know JWTs have secrets too?", "127.0.0.1:5001", "Building_Gas_Station")
             `, (err) => {
                 if (err) {

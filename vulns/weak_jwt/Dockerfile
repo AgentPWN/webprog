@@ -6,7 +6,6 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
-ENV FLAG=flag{y0u_br0k3_7h3_jw7}
 
 # Create and set working directory
 WORKDIR /app

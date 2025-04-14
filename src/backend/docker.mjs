@@ -5,8 +5,12 @@ export async function dockerize(image) {
 
     const imagePortMap = {
         'nginx-cookie-sqli': { exposedPort: '5000/tcp', hostPort: '80' },
-        'weak-jwt-secret': { exposedPort: '5001/tcp', hostPort: '5001' },
         'none-alg-jwt': { exposedPort: '5000/tcp', hostPort: '5000' },
+        'weak-jwt-secret': { exposedPort: '5001/tcp', hostPort: '5001' },
+        'ssrf': { exposedPort: '5002/tcp', hostPort: '5002' },
+        'robots': { exposedPort: '5003/tcp', hostPort: '5003' },
+        'easy_sqli': { exposedPort: '5004/tcp', hostPort: '5004' },
+        'directory_traversal': { exposedPort: '5005/tcp', hostPort: '5005' },
     };
 
     const portConfig = imagePortMap[image];

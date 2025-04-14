@@ -2,7 +2,7 @@ from flask import Flask
 
 app = Flask(__name__)
 
-@app.route('/flag')
+@app.route('/')
 def flag():
     return "flag{n4h_man_h0w_did_I_mes5_up_th1s_64d}"
 
