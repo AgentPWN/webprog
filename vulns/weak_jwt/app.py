@@ -8,7 +8,7 @@ SECRET_KEY = "secret"  # <-- intentionally weak!
 
 @app.route('/')
 def home():
-    return "Welcome! Go to /login to get your token."
+    return "    ."
 
 @app.route('/login', methods=['GET'])
 def login():
