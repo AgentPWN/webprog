@@ -5,8 +5,7 @@ import datetime
 app = Flask(__name__)
 FLAG = "flag{y0u_br0k3_7h3_jw7}"
 
-SECRET_KEY = "secret"  # <-- intentionally weak!
-
+SECRET_KEY = "secret" 
 @app.route('/')
 def home():
     token = jwt.encode({
@@ -37,4 +36,4 @@ def admin():
         return jsonify({'message': 'Token is invalid!', 'error': str(e)}), 403
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001)  # Correct for Docker
+    app.run(host='0.0.0.0', port=5001)

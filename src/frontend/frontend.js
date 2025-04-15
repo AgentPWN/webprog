@@ -1,9 +1,6 @@
 import * as THREE from '/node_modules/three/build/three.module.js';
-// import { clickchecker } from './click_checker.js';
 import { GLTFLoader } from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
-// import {modelloader} from './loader.js';
 import {lighting} from './lighting.js';
-// let buildings = ['BurgerBuilding','Cinema','PizzaBoard','PizzaBuilding','ShopBuilding'];
 let added = [];
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
@@ -12,8 +9,7 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 const mouse = new THREE.Vector2();
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 scene.background = new THREE.Color(0xffffff);
-// let city = new THREE.Group();
-let city = 0;
+let city;
 let isDragging = false;
 let startMousePosition,currentMousePosition,deltax,deltay = 0;
 let right_edge = 0;
@@ -22,6 +18,7 @@ let width = 0;
 let top_edge = 0;
 let bottom_edge = 0;
 let depth = 0;
+let targetName = "";
 camera.position.set(80, 50, -80);
 camera.lookAt(60, 0, -105);
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -71,79 +68,60 @@ console.log(dictionary);
 let chal = 0;
 let dialog_open = false;
 let loader = new GLTFLoader();
-
-// let city = 0;
 try{
   lighting(scene);
 }
 catch(error){
   console.error("lighting.js",error)
 }
-
 let id = 0;
 let x = 0;
 let y = 0;
 let z = 0;
+let radius = 0;
+const cityPool = [];
+const maxBlocks = 100;
 fetch('http://localhost:3001/api/files/noncyberpunk')
 .then(response=>response.json())
 .then(data=>{
   data.files.forEach(element => {
     url = `/src/models/buildings/noncyberpunk/${element}`;
-    // loader = new GLTFLoader();
     const cityGroup = new THREE.Group();
-
-loader.load(url, (gltf) => {
-    city = gltf.scene;
-    
-    // Compute bounding box to get the city dimensions
-    const bbox = new THREE.Box3().setFromObject(city);
-    width = bbox.max.x - bbox.min.x-1;
-    depth = bbox.max.z - bbox.min.z-1;
-
-    // Center the original city
-    city.position.set(0, 0, 0);
-    cityGroup.add(city);
-
-    // Clone city and place it at four edges
-    const positions = [
-        [width, 0, 0],
-        [-width, 0, 0],
-        [-2*width, 0, 0],
-
-        [0, 0, depth],
-        [0, 0, -depth],
-        [0, 0, -2*depth],
-
-        [width, 0, -depth],
-        [-width, 0, depth],
-        [width, 0, depth],
-        [-width, 0, -depth],
-    ];
-    // bottom_edge += depth;
-    top_edge += depth;
-    // left_edge += width;
-    right_edge += width;
-
-    positions.forEach(pos => {
-        const clone = city.clone();
-        clone.position.set(...pos);
-        cityGroup.add(clone);
+    loader.load(url, (gltf) => {
+      city = gltf.scene;
+      const bbox = new THREE.Box3().setFromObject(city);
+      width = bbox.max.x - bbox.min.x-1;
+      depth = bbox.max.z - bbox.min.z-1;
+      city.position.set(0, 0, 0);
+      cityGroup.add(city);
+      const positions = [
+          [width, 0, 0],
+          [-width, 0, 0],
+          [-2*width, 0, 0],
+          [0, 0, depth],
+          [0, 0, -depth],
+          [0, 0, -2*depth],
+          [width, 0, -depth],
+          [-width, 0, depth],
+          [width, 0, depth],
+          [-width, 0, -depth],
+      ];
+      top_edge += depth;
+      right_edge += width;
+      positions.forEach(pos => {
+          const clone = city.clone();
+          clone.position.set(...pos);
+          cityGroup.add(clone);
+      });
+      scene.add(cityGroup);
     });
-
-    scene.add(cityGroup);
-
   });
 });
-
-    });
-let radius = 0;
 const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
-
 let  movementSpeed = 1;
 document.addEventListener('mousedown', (event) =>{
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-  // isDragging = true;
   startMousePosition = { x : event.clientX , y : event.clientY };
 })
 
@@ -162,60 +140,33 @@ document.addEventListener("keydown", (event) => {
           radius = camera.position.length();
           clicked = false;
       }
-
-      // Move camera
       if (event.key == "w") camera.position.z -= movementSpeed;
       if (event.key == "s") camera.position.z += movementSpeed;
       if (event.key == "a") camera.position.x -= movementSpeed;
       if (event.key == "d") camera.position.x += movementSpeed;
-
-      // Check if camera has moved beyond edges
       if (camera.position.x <= left_edge || camera.position.z >= top_edge || camera.position.x >= right_edge || camera.position.z <= bottom_edge) {
         expandCity();
       }
   }
 });
-
-// Pooling mechanism to reuse city blocks instead of creating new ones
-const cityPool = [];
-const maxBlocks = 100; // Maximum number of city blocks in the scene
-
 function getCityBlock() {
   if (cityPool.length > 0) {
       const block = cityPool.pop();
       block.visible = true;
       return block;
   } else {
+      // console.log(city.getObjectByName(targetName).userData.bruh)
       return city.clone();
   }
 }
-
-// function releaseCityBlock(block) {
-//   block.visible = false;
-//   cityPool.push(block);
-// }
-
 function expandCity() {
   const cityGroup = new THREE.Group();
   let newPositions = [];
-  //console.log(left_edge);
-  // console.log(camera.position.x);
   if (camera.position.x >= right_edge /*&& !isPositionOccupied(new THREE.Vector3(right_edge + width, 0, top_edge - depth))*/) {
       console.log("right");
       newPositions = [
-        //[left_edge,0,bottom_edge],
-        //[left_edge,0,top_edge-depth],
-        //[left_edge,0, top_edge],
-        //[right_edge, 0, bottom_edge],
-
-        //[right_edge, 0, top_edge],
-        //[left_edge-width, 0, top_edge + depth],
-        //[left_edge, 0, top_edge + depth],
-        //[right_edge+width, 0, top_edge+depth],
         [right_edge, 0, top_edge+depth],
-
         [left_edge+width, 0, top_edge+depth],
-        //[right_edge, 0, top_edge],
         [right_edge + width, 0, top_edge],
         [right_edge + width, 0, top_edge - depth],
         [right_edge + width, 0, bottom_edge]
@@ -225,12 +176,6 @@ function expandCity() {
   } if (camera.position.z >= top_edge /*&& !isPositionOccupied(new THREE.Vector3(right_edge - width, 0, top_edge + depth))*/) {
       console.log("up");
       newPositions = [
-        //[left_edge,0,top_edge-depth],
-        //[right_edge,0,top_edge-width],
-        //[right_edge-width,0,top_edge-width],
-        //[right_edge,0,top_edge],
-        //[left_edge,0,top_edge],
-        //[right_edge-width,0,top_edge],
         [right_edge, 0, top_edge + depth],
         [left_edge, 0, top_edge + depth],
         [left_edge-width, 0, top_edge + depth],
@@ -246,11 +191,6 @@ function expandCity() {
   } if (camera.position.z <= bottom_edge /*&& !isPositionOccupied(new THREE.Vector3(right_edge - width, 0, bottom_edge - depth))*/) {
       console.log("down");
       newPositions = [
-        //[left_edge+width,0,bottom_edge+depth],
-        //[left_edge+width,0,bottom_edge+depth],
-        //[left_edge,0,bottom_edge+depth],
-        //[left_edge+width,0,bottom_edge],
-        //[left_edge+width,0,bottom_edge],
         [left_edge-width,0,bottom_edge-depth],
         [right_edge - width, 0, bottom_edge - depth],
         [right_edge, 0, bottom_edge - depth],
@@ -261,16 +201,12 @@ function expandCity() {
   } if (camera.position.x <= left_edge /*&& !isPositionOccupied(new THREE.Vector3(left_edge - width, 0, top_edge - depth))*/) {
       console.log("left");
       newPositions = [
-        //[left_edge + width, 0, top_edge],
-        //[left_edge + width, 0, top_edge - depth],
-        //[left_edge + width, 0, bottom_edge],
         [left_edge - 2*width, 0, top_edge],
         [left_edge - 2*width, 0, top_edge - depth],
         [left_edge - 2*width, 0, bottom_edge-depth],
         [left_edge - 2*width, 0, top_edge+depth],
         [left_edge, 0, top_edge],
         [left_edge, 0, top_edge+depth],
-        //[left_edge, 0, top_edge - depth],
         [left_edge, 0, bottom_edge-depth],
         [left_edge - width, 0, top_edge],
         [left_edge - width, 0, top_edge - depth],
@@ -283,41 +219,16 @@ function expandCity() {
       left_edge -= width;
       console.log(left_edge, width, right_edge);
   }
-
-  // Add new city blocks from pool
   newPositions.forEach((pos) => {
       const block = getCityBlock();
       block.position.set(...pos);
       cityGroup.add(block);
   });
-
   scene.add(cityGroup);
-
-  // Remove distant city blocks to prevent lag
-  // removeDistantBlocks();
 }
-
-// function removeDistantBlocks() {
-//   while (scene.children.length > maxBlocks) {
-//       const oldestBlock = scene.children[0];
-//       scene.remove(oldestBlock);
-//       releaseCityBlock(oldestBlock);
-//   }
-// }
-
-        
-        // Ensure infinite looping
-// Function to get the city size dynamically
-
-
-
 document.addEventListener('keyup', () => {
     clicked = true;
 });
-
-
-
-
 document.addEventListener("click", (clicked) => {
   clicked.stopPropagation();
   const raycaster = new THREE.Raycaster();
@@ -400,21 +311,16 @@ export async function flagchecker(id, flag) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, flag }),
     });
-
     let data = await response.json();
     if (data.message != "error") {
-      const position = chal.position.clone();
-      const orientation = chal.quaternion.clone();
-      const id = chal.userData.id;
-      const targetName = chal.name; // Store the name for later use
-      
-      // Remove old model from city and scene
+      targetName = chal.name;
       const target = city.getObjectByName(targetName);
-      if (target) {
-        city.remove(target); // Remove from city first
-        scene.remove(target); // Then remove from scene
-      }
-      
+      const position = target.position.clone();
+      const orientation = target.quaternion.clone();
+      const id = target.userData.id;
+      // if (target) {
+      //   city.remove(target);
+      // }
       let url = `/src/models/buildings/cyberpunk/cyberpunk.glb`;
       const loader = new GLTFLoader();
       loader.load(url, function (gltf) {
@@ -426,17 +332,32 @@ export async function flagchecker(id, flag) {
             foundChild = child;
           }
         });
-
-        const newModel = foundChild || model;
+        console.log(foundChild.name)
+        const newModel = foundChild;
         newModel.userData.id = id;
+        newModel.userData.bruh = "bruh";
         newModel.position.copy(position);
-        newModel.quaternion.copy(orientation);
-        newModel.name = targetName; // Ensure the name is preserved
-        
-        // Add to both city and scene
+        newModel.quaternion.copy(orientation);        
+        if (target) {
+          city.remove(target);
+          scene.remove(target);
+          // console.log("removed target");
+          target.traverse((child) => {
+            if (child.geometry) child.geometry.dispose();
+            if (child.material) {
+              if (Array.isArray(child.material)) {
+                  child.material.forEach(m => m.dispose());
+              } else {
+                  child.material.dispose();
+              }
+            }
+          });
+        }
         city.add(newModel);
+        // if (city.getObjectByName(targetName)){
+          // console.log(city.getObjectByName(targetName).userData.bruh)
+        // }
         scene.add(newModel);
-        
         dictionary[newModel.name] = 1;
         console.log(dictionary);
       });
@@ -449,7 +370,5 @@ export async function flagchecker(id, flag) {
 
 function renderScene() {
   renderer.render(scene, camera);
-  // console.log(camera.position.x);
-
 }
 renderer.setAnimationLoop(renderScene);
