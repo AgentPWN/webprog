@@ -33,6 +33,7 @@ if __name__ == '__main__':
             "- Profit.\n\n"
             "Hint: Not all files want to be found. Some hide very well...\n"
             "Maybe something called 'flag.txt' is worth peeking at? 🕵️‍♂️\n"
-            "Good luck. Or don't. ¯\\_(ツ)_/¯"
+            "Good luck. Or don't. ¯\\_(ツ)_/¯\n"
+            "There might be a convenient query parameter called file."
         )
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5005)

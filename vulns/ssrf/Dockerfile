@@ -11,19 +11,21 @@ ENV FLASK_ENV=production
 WORKDIR /app
 
 # Install dependencies
-RUN pip install --no-cache-dir flask pyjwt
+RUN pip install --no-cache-dir flask pyjwt requests
 
 # Copy application files
 COPY . /app/
 
-# Expose the port the app runs on
-EXPOSE 5002 
+# Expose the necessary ports
+EXPOSE 5002
 EXPOSE 5008
 
 # Set non-root user
 RUN useradd -m ctfuser && chown -R ctfuser:ctfuser /app
 USER ctfuser
 
-# Command to run the application
-CMD ["python", "app.py"]
-CMD ["python", "server.py"]
+# Copy the entrypoint script
+COPY entrypoint.sh /app/entrypoint.sh
+
+# Command to run the entrypoint script
+CMD ["sh", "/app/entrypoint.sh"]
