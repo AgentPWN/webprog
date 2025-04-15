@@ -69,51 +69,40 @@
 <p>Found a bug? Let us know and help improve the website!</p>
 
 <div class="report-container">
-    <input type="text" id="reporter-name" placeholder="Your Name" required>
-    <textarea id="bug-details" placeholder="Describe the bug..."></textarea>
+    <input id="nameInput" placeholder="Your name" />
+    <textarea id="messageInput" placeholder="Describe the bug..."></textarea>    
     <button onclick="report_bugs()">Submit Report</button>
 </div>
 
 <h2>📜 Reported Issues</h2>
 <div class="reports" id="bug-list"></div>
-<a href="/reports.html" ><button>click me</button></a>
+<a href="/report.html" ><button>click me</button></a>
 <script nonce="abcde">
-    function report_bugs(){
-        let report = document.getElementById("bug-details");
-        let value = report.value;
-        let name = document.getElementById('reporter-name');
-        let data = name.value;
-        console.log(value);
-        fetch("/api/bug_report",{
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
+    function report_bugs() {
+        let name = document.getElementById('nameInput').value;
+        let message = document.getElementById('messageInput').value;
+
+        console.log("Submitting:", { name, message });
+
+        fetch("/api/bug_report", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify({name:data,message:value})
+            body: JSON.stringify({ name, message })
         })            
-        .then(response=>response.json())
-        .then(console.log("data has been added to the report"))
+        .then(response => response.json())
+        .then(data => {
+            console.log("Data has been added to the report:", data);
+            alert("Bug report submitted successfully!");
+            document.getElementById('nameInput').value = '';
+            document.getElementById('messageInput').value = '';
+        })
+        .catch(err => {
+            console.error("Failed to submit bug report:", err);
+            alert("Error submitting bug report.");
+        });
     }
 </script>
-<script nonce="abcde">
-    document.querySelector("#report").addEventListener("click",report_bugs);
-</script>  
-<!--<script>
-    function submitBug() {
-        let name = document.getElementById("reporter-name").value;
-        let bugText = document.getElementById("bug-details").value;
-
-        if (name.trim() && bugText.trim()) {
-            let reportDiv = document.createElement("div");
-            reportDiv.classList.add("report-item");
-            reportDiv.innerHTML = `<strong>${name}:</strong> <p>${bugText}</p>`;
-            document.getElementById("bug-list").appendChild(reportDiv);
-
-            document.getElementById("reporter-name").value = "";
-            document.getElementById("bug-details").value = "";
-        }
-    }
-</script>-->
-
 </body>
 </html>

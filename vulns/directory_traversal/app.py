@@ -6,7 +6,7 @@ def index():
     file = request.args.get('file', 'welcome.txt')
     if '../' in file:
         file = file.replace('../', '')
-    try:
+    try:#../
         with open(f'./files/{file}', 'r') as f:
             content = f.read()
         return render_template("file.html", file=file, content=content)

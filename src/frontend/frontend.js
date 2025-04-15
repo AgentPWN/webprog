@@ -11,6 +11,7 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 scene.background = new THREE.Color(0xffffff);
 let city;
 let isDragging = false;
+let light_amount=5;
 let startMousePosition,currentMousePosition,deltax,deltay = 0;
 let right_edge = 0;
 let left_edge = 0;
@@ -155,7 +156,6 @@ function getCityBlock() {
       block.visible = true;
       return block;
   } else {
-      // console.log(city.getObjectByName(targetName).userData.bruh)
       return city.clone();
   }
 }
@@ -241,49 +241,46 @@ document.addEventListener("click", (clicked) => {
     console.log(chal.name);
     console.log("Clicked Object Solved Status:", dictionary[clickedObject.name]);
     if (dictionary[clickedObject.name] !== 1) {
+      if (names.includes(clickedObject.name)){
+          const challengeId = clickedObject.name;
+          fetch(`http://localhost:3001/api/${challengeId}`)
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.desc) {
+                dialog.innerHTML = `
+                  <p>${data.desc}<br>Challenge link: ${data.link}</p>
+                  <label for="${challengeId}">Enter flag</label>
+                  <input id="${challengeId}" name="flag">
+                  <button onclick="submitFlag('${challengeId}')" id="closeDialog">Enter</button>
+                `;
+                dialog_open = true;
+                dialog.addEventListener("click", (event) => {
+                  event.stopPropagation();
+                });
+              } else {
+                dialog.innerHTML = `
+                  <p>This challenge is a work in progress, please give us some time.</p>
+                  <button id="closeDialog">Close</button>
+                `;
+                dialog_open = true;
+                dialog.addEventListener("click", (event) => {
+                  event.stopPropagation();
+                });
 
-  if (names.includes(clickedObject.name)){
-      const challengeId = clickedObject.name;
-
-      fetch(`http://localhost:3001/api/${challengeId}`)
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.desc) {
-            dialog.innerHTML = `
-              <p>${data.desc}<br>Challenge link: ${data.link}</p>
-              <label for="${challengeId}">Enter flag</label>
-              <input id="${challengeId}" name="flag">
-              <button onclick="submitFlag('${challengeId}')" id="closeDialog">Enter</button>
-            `;
-            dialog_open = true;
-            dialog.addEventListener("click", (event) => {
-              event.stopPropagation();
+              }
+              dialog.showModal();
+              const closebutton = document.getElementById("closeDialog");
+              if (closebutton) {
+                closebutton.addEventListener("click", function(event) {
+                  event.stopPropagation();
+                  dialog.close();
+                  dialog_open = false;
+                });
+              }
             });
-
-          } else {
-            dialog.innerHTML = `
-              <p>This challenge is a work in progress, please give us some time.</p>
-              <button id="closeDialog">Close</button>
-            `;
-            dialog_open = true;
-            dialog.addEventListener("click", (event) => {
-              event.stopPropagation();
-            });
-
-          }
-
-          dialog.showModal();
-          const closebutton = document.getElementById("closeDialog");
-          if (closebutton) {
-            closebutton.addEventListener("click", function(event) {
-              event.stopPropagation();
-              dialog.close();
-              dialog_open = false;
-            });
-          }
-        
-        });
-    }} else {
+      }
+  } 
+  else {
       dialog.innerHTML = `
         <p>You have already solved this!</p>
         <button id="closeDialog">Close</button>
@@ -303,7 +300,6 @@ document.addEventListener("click", (clicked) => {
           }
     }}  
 });
-
 export async function flagchecker(id, flag) {
   try {
     let response = await fetch("http://localhost:3001/api/checkflag", {
@@ -312,15 +308,12 @@ export async function flagchecker(id, flag) {
       body: JSON.stringify({ id, flag }),
     });
     let data = await response.json();
-    if (data.message != "error") {
+    if (data.message !== "error") {
       targetName = chal.name;
       const target = city.getObjectByName(targetName);
       const position = target.position.clone();
       const orientation = target.quaternion.clone();
       const id = target.userData.id;
-      // if (target) {
-      //   city.remove(target);
-      // }
       let url = `/src/models/buildings/cyberpunk/cyberpunk.glb`;
       const loader = new GLTFLoader();
       loader.load(url, function (gltf) {
@@ -332,42 +325,37 @@ export async function flagchecker(id, flag) {
             foundChild = child;
           }
         });
-        console.log(foundChild.name)
         const newModel = foundChild;
         newModel.userData.id = id;
         newModel.userData.bruh = "bruh";
         newModel.position.copy(position);
-        newModel.quaternion.copy(orientation);        
+        newModel.quaternion.copy(orientation);
         if (target) {
           city.remove(target);
           scene.remove(target);
-          // console.log("removed target");
           target.traverse((child) => {
             if (child.geometry) child.geometry.dispose();
             if (child.material) {
               if (Array.isArray(child.material)) {
-                  child.material.forEach(m => m.dispose());
+                child.material.forEach((m) => m.dispose());
               } else {
-                  child.material.dispose();
+                child.material.dispose();
               }
             }
           });
         }
         city.add(newModel);
-        // if (city.getObjectByName(targetName)){
-          // console.log(city.getObjectByName(targetName).userData.bruh)
-        // }
         scene.add(newModel);
         dictionary[newModel.name] = 1;
         console.log(dictionary);
       });
     }
+    return response;
   } catch (error) {
     console.error("Error:", error);
+    return null;
   }
 }
-
-
 function renderScene() {
   renderer.render(scene, camera);
 }

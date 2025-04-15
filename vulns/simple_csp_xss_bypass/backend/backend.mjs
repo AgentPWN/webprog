@@ -28,14 +28,19 @@ db.run(`DROP TABLE IF EXISTS bug_reports`, (err) => {
 });
 db.run(`
     CREATE TABLE IF NOT EXISTS bug_reports (
-        name TEXT NOT NULL PRIMARY KEY,
-        message TEXT NOT NULL
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        message TEXT NOT NULL,
+        title TEXT DEFAULT 'Bug Report',
+        status TEXT DEFAULT 'open',
+        date TEXT DEFAULT (DATE('now'))
     )
 `, (err) => {
     if (err) {
         console.error('Error creating table:', err.message);
     }
 });
+
 
 app.post('/api/bug_report', (req, res) => {
     const { name, message } = req.body;
@@ -44,22 +49,30 @@ app.post('/api/bug_report', (req, res) => {
         return res.status(400).json({ error: 'Name and message are required' });
     }
 
-    db.run(`INSERT INTO bug_reports (name, message) VALUES (?, ?)`, [name, message], function(err) {
+    const title = "Bug Report";
+    const status = "open";
+    const date = new Date().toISOString().split("T")[0];
+
+    const sql = `INSERT INTO bug_reports (title, name, message, status, date)
+                 VALUES (?, ?, ?, ?, ?)`;
+
+    db.run(sql, [title, name, message, status, date], function (err) {
         if (err) {
+            console.error("SQL Error:", err.message);
             return res.status(500).json({ error: err.message });
         }
+
         res.status(201).json({ id: this.lastID, name, message });
     });
 
     import('./bot.js').then((botModule) => {
         const module = botModule.default || botModule;
-        const urlToVisit = 'http://localhost:2001/reports.html'; // Replace with your target URL
-        
+        const urlToVisit = 'http://localhost:2001/reports.html';
+
         module.bot(urlToVisit)
             .then(result => console.log('Bot completed with result:', result))
             .catch(err => console.error('Error running bot:', err));
     }).catch(err => console.error('Error importing bot module:', err));
-    
 });
 
 app.get('/api/reports', (req, res) => {
@@ -67,9 +80,11 @@ app.get('/api/reports', (req, res) => {
         if (err) {
             return res.status(500).json({ err: err.message });
         }
+        // console.log({reports:rows})
         res.json({ reports: rows });
     });
 });
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

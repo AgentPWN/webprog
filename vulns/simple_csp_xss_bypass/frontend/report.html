@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Reports Dashboard</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #0ff; /* Cyberpunk Neon */
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #ff00ff; /* Neon Pink */
+        }
+        .report-container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #222;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px #0ff;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            background-color: #333;
+            color: #0ff;
+            border: 1px solid #0ff;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #ff00ff;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #ff1493;
+        }
+        .reports {
+            margin-top: 20px;
+            text-align: left;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .report-item {
+            background-color: #333;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border-left: 3px solid #0ff;
+            position: relative;
+        }
+        .report-item:hover {
+            box-shadow: 0 0 10px #0ff;
+        }
+        .report-item strong {
+            color: #ff0;
+        }
+        .report-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            color: #ff00ff;
+        }
+        .report-status {
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .status-open {
+            background-color: #ff0000;
+            color: white;
+        }
+        .status-in-progress {
+            background-color: #ffff00;
+            color: #121212;
+        }
+        .status-resolved {
+            background-color: #00ff00;
+            color: #121212;
+        }
+        .filter-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .filter-btn {
+            background-color: #333;
+            color: #0ff;
+            border: 1px solid #0ff;
+        }
+        .filter-btn.active {
+            background-color: #0ff;
+            color: #121212;
+        }
+        .search-box {
+            margin-bottom: 20px;
+        }
+        .search-box input {
+            padding: 8px;
+            background-color: #333;
+            color: #0ff;
+            border: 1px solid #0ff;
+            border-radius: 5px;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🛠 Bug Reports Dashboard</h1>
+<p>View and manage all reported issues</p>
+
+<div class="filter-controls">
+    <button class="filter-btn active" data-status="all" onclick="filterReports('all', event)">All</button>
+    <button class="filter-btn" data-status="open" onclick="filterReports('open', event)">Open</button>
+    <button class="filter-btn" data-status="in-progress" onclick="filterReports('in-progress', event)">In Progress</button>
+    <button class="filter-btn" data-status="resolved" onclick="filterReports('resolved', event)">Resolved</button>
+</div>
+
+<div class="search-box">
+    <input type="text" id="search-input" placeholder="Search reports..." onkeyup="searchReports()">
+</div>
+
+<div class="report-container">
+    <h2>📜 All Reported Issues</h2>
+    <div class="reports" id="bug-list">
+        <!-- Reports will be dynamically inserted here -->
+    </div>
+</div>
+
+<script>
+    let bugReports = [
+    {
+        id: 1,
+        reporter: "NeonSamurai",
+        title: "Movie details not loading",
+        description: "When clicking on 'The Irishman', the details page shows a blank screen. Console shows 404 error.",
+        date: "2023-11-15",
+        status: "open"
+    },
+    {
+        id: 2,
+        reporter: "CyberPunk99",
+        title: "Review submission fails",
+        description: "Submit button does nothing when trying to post a review for 'Stranger Things'. No error message appears.",
+        date: "2023-11-14",
+        status: "in-progress"
+    },
+    {
+        id: 3,
+        reporter: "ByteMaster",
+        title: "Mobile layout broken",
+        description: "On mobile devices, the movie grid overlaps with the header. Tested on Chrome Android.",
+        date: "2023-11-12",
+        status: "resolved"
+    },
+    {
+        id: 4,
+        reporter: "GlitchHunter",
+        title: "Rating stars not working",
+        description: "Cannot select more than 3 stars when rating 'Bird Box'. JavaScript error in console.",
+        date: "2023-11-10",
+        status: "open"
+    },
+    {
+        id: 5,
+        reporter: "CodeNinja",
+        title: "Back button disappears",
+        description: "After submitting a review, the back button vanishes from the details page.",
+        date: "2023-11-08",
+        status: "in-progress"
+    }
+];
+
+function renderReports(reportsToAdd) {
+    const container = document.getElementById('bug-list');
+    if (!container) {
+        console.error("Error: bug-list element not found");
+        return;
+    }
+    
+    // Clear existing reports first
+    container.innerHTML = '';
+
+    if (reportsToAdd.length === 0) {
+        container.innerHTML = '<p>No bug reports match your criteria.</p>';
+        return;
+    }
+
+    reportsToAdd.forEach(report => {
+        const div = document.createElement('div');
+        div.classList.add('report-item');
+        div.dataset.reportId = report.id;
+        
+        // Determine status class
+        let statusClass = '';
+        if (report.status === 'open') statusClass = 'status-open';
+        else if (report.status === 'in-progress') statusClass = 'status-in-progress';
+        else if (report.status === 'resolved') statusClass = 'status-resolved';
+        
+        div.innerHTML = `
+            <div class="report-meta">
+                <span>Reported by: <strong>${report.reporter}</strong></span>
+                <span>Date: ${report.date}</span>
+            </div>
+            <h3>${report.title}</h3>
+            <p>${report.description}</p>
+            <div class="report-meta">
+                <span>Status: <span class="report-status ${statusClass}">${report.status}</span></span>
+                <div class="status-controls">
+                    <button onclick="changeStatus(${report.id}, 'open')">Open</button>
+                    <button onclick="changeStatus(${report.id}, 'in-progress')">In Progress</button>
+                    <button onclick="changeStatus(${report.id}, 'resolved')">Resolved</button>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+// Load initial reports immediately
+renderReports(bugReports);
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Fetch reports from API
+    fetchReportsFromAPI();
+});
+
+function fetchReportsFromAPI() {
+    fetch('/api/reports')
+    .then(response => response.json())
+    .then(data => {
+        if (data && data.reports && Array.isArray(data.reports)) {
+            const apiReports = data.reports.map(report => {
+                return {
+                    id: report.id,
+                    reporter: report.name || "Anonymous", // <-- use 'name'
+                    title: report.title || "Untitled",
+                    description: report.message || "",    // <-- use 'message'
+                    date: report.date || new Date().toISOString().split("T")[0],
+                    status: report.status || "open"
+                };
+            });
+            bugReports = [...bugReports, ...apiReports];
+            renderReports(bugReports);
+        }
+    })
+    .catch(err => {
+        console.error("Error fetching reports:", err);
+        const container = document.getElementById('bug-list');
+        if (container) {
+            const errorDiv = document.createElement('div');
+            errorDiv.classList.add('error-message');
+            errorDiv.textContent = "Failed to load additional reports from server. Showing local reports only.";
+            errorDiv.style.color = 'red';
+            errorDiv.style.padding = '10px';
+            container.prepend(errorDiv);
+        }
+    });
+
+}
+
+function filterReports(status, event) {
+    document.querySelectorAll(".filter-btn").forEach(btn => {
+        btn.classList.remove("active");
+    });
+    
+    if (event && event.target) {
+        event.target.classList.add("active");
+    } else {
+        // For direct onclick handlers, find the button with data-status
+        document.querySelector(`.filter-btn[data-status="${status}"]`).classList.add("active");
+    }
+
+    if (status === "all") {
+        renderReports(bugReports);
+    } else {
+        const filtered = bugReports.filter(report => report.status === status);
+        renderReports(filtered);
+    }
+}
+
+function searchReports() {
+    const searchTerm = document.getElementById("search-input").value.toLowerCase();
+    if (searchTerm === '') {
+        renderReports(bugReports);
+        return;
+    }
+    
+    const filtered = bugReports.filter(report => 
+        report.title.toLowerCase().includes(searchTerm) || 
+        report.description.toLowerCase().includes(searchTerm) ||
+        report.reporter.toLowerCase().includes(searchTerm)
+    );
+    renderReports(filtered);
+}
+
+function changeStatus(id, newStatus) {
+    const reportId = parseInt(id);
+    const report = bugReports.find(r => r.id === reportId);
+    if (report) {
+        report.status = newStatus;
+        
+        // Optionally, update the status on the server
+        // updateReportStatusOnServer(reportId, newStatus);
+        
+        renderReports(bugReports);
+    }
+}
+
+// Uncomment this function if you want to implement server updates
+/*
+function updateReportStatusOnServer(id, newStatus) {
+    fetch(`/api/reports/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Failed to update status on server');
+        return response.json();
+    })
+    .then(data => {
+        console.log('Status updated successfully on server', data);
+    })
+    .catch(error => {
+        console.error('Error updating status on server:', error);
+        // You could show an error message here
+    });
+}
+*/
+</script>
+
+</body>
+</html>

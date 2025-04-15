@@ -1,20 +1,17 @@
 import Docker from 'dockerode';
-
 export async function dockerize(image) {
     const docker = new Docker({ socketPath: '/var/run/docker.sock' });
-
     const imagePortMap = {
-        'nginx-cookie-sqli': { exposedPort: '5000/tcp', hostPort: '80' },
+        'nginx-cookie-sqli': { exposedPort: '80/tcp', hostPort: '80' },
         'none-alg-jwt': { exposedPort: '5000/tcp', hostPort: '5000' },
         'weak-jwt-secret': { exposedPort: '5001/tcp', hostPort: '5001' },
         'ssrf': { exposedPort: '5002/tcp', hostPort: '5002' },
         'robots': { exposedPort: '5003/tcp', hostPort: '5003' },
         'easy_sqli': { exposedPort: '5004/tcp', hostPort: '5004' },
         'directory_traversal': { exposedPort: '5005/tcp', hostPort: '5005' },
+        'simple-csp-xss-backend': { exposedPort: '2001/tcp', hostPort: '2001' }
     };
-
     const portConfig = imagePortMap[image];
-
     if (!portConfig) {
         console.error(`Image ${image} not found in configuration.`);
         return;
@@ -28,11 +25,9 @@ export async function dockerize(image) {
                 PortBindings: { [portConfig.exposedPort]: [{ HostPort: portConfig.hostPort }] },
             },
         });
-
         console.log('Container created');
         await container.start();
         console.log('Container started');
-
         setTimeout(async () => {
             try {
                 await container.stop();
@@ -42,7 +37,7 @@ export async function dockerize(image) {
             } catch (err) {
                 console.error(`Error stopping/removing container ${container.id}:`, err);
             }
-        }, 10 * 1000);
+        }, 60 * 1000);
     } catch (err) {
         console.error('Docker error:', err);
     }

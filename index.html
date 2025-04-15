@@ -11,41 +11,46 @@
         </dialog>
         <script type="module">
             import { flagchecker } from "./src/frontend/frontend.js";
-            function submitFlag(challengeId) {
+          
+            async function submitFlag(challengeId) {
                 let name = document.getElementsByName("flag")[0];
-                console.log(name);
                 const inputElement = document.getElementById(challengeId);
                 
                 if (!inputElement) {
-                    console.error("Input element not found!");
-                    return;
+                  console.error("Input element not found!");
+                  return;
                 }
-            
+              
                 const flagValue = inputElement.value;
-            
+              
                 if (!flagValue) {
-                    alert("Please enter a flag!");
-                    return;
+                  alert("Please enter a flag!");
+                  return;
                 }
-            
-                if (flagchecker(name.id, name.value)) {
+              
+                try {
+                  const response = await flagchecker(name.id, name.value);
+              
+                  if (response && response.status === 200) {
                     console.log("let's go");
                     alert("You solved it!!");
-            
-                    // Explicitly get the dialog again
-                    const dialog = document.getElementById("chal_desc"); 
-                    if (dialog) {
-                        dialog.close(); // Properly close the dialog
-                    } else {
-                        console.error("Dialog element not found!");
-                    }
+              
+                    const dialog = document.getElementById("chal_desc");
+                    if (dialog) dialog.close();
+                    else console.error("Dialog element not found!");
+                  } else {
+                    alert("Your flag is incorrect :(");
+                  }
+                } catch (error) {
+                  console.error("Error checking flag:", error);
+                  alert("Something went wrong!");
                 }
-            }
-            
+              }
+              
+          
             window.submitFlag = submitFlag;
-            
-
           </script>
+          
           
     </body>
 </html>

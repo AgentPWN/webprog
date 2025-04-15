@@ -9,9 +9,7 @@ def robots():
     return send_from_directory(app.static_folder, 'robots.txt')
 @app.route('/s3cr3t_adm1n_p4n3l')
 def admin_panel():
-    if request.remote_addr != '127.0.0.1':
-        return redirect(url_for('index'))
-    return f"Admin Panel - Here's your flag: {SECRET_FLAG}"
+    return render_template("admin.html", content=SECRET_FLAG)
 @app.route('/static/<path:filename>')
 def static_files(filename):
     return send_from_directory(app.static_folder, filename)

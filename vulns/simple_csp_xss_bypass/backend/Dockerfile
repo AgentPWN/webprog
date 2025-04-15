@@ -13,10 +13,10 @@ COPY package*.json ./
 RUN npm install
 
 # Copy the rest of the app
-COPY . .
+COPY ../ /usr/src/app/
 
 # Move into backend
-WORKDIR /usr/src/app/backend
+WORKDIR /usr/src/app/
 
 # Install playwright browsers with dependencies
 RUN npx playwright install --with-deps

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Control Panel - Unauthorized Access</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background-color: #000;
+      color: #ccc;
+      font-family: monospace;
+      padding: 2rem;
+    }
+    .highlight {
+      color: #0ff;
+      font-weight: bold;
+    }
+    .warning {
+      color: #f00;
+    }
+    .terminal {
+      border-left: 3px solid #888;
+      padding-left: 1rem;
+      margin-top: 2rem;
+    }
+    a {
+      color: #f0f;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .redacted {
+      background-color: #444;
+      color: #444;
+      user-select: none;
+      cursor: default;
+    }
+    .redacted:hover {
+      color: #0f0;
+    }
+    hr {
+      border-color: #444;
+      margin: 2rem 0;
+    }
+    .center {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="center">⚠️ Admin Control Panel</h1>
+  <p class="center">Welcome to the most secure and highly confidential admin control panel.</p>
+
+  <hr>
+
+  <h2>🛠️ Admin Actions</h2>
+  <p>This panel allows you to:</p>
+  <ul>
+    <li><span class="highlight">Manage users</span> (but not really, we promise)</li>
+    <li><span class="highlight">View logs</span> (there are none, don’t worry)</li>
+    <li><span class="highlight">Control system settings</span> (but only if you can figure out the backdoor)</li>
+    <li>Change everything, but nothing will really happen</li>
+  </ul>
+
+  <div class="terminal">
+    <p><strong># Important:</strong> Make sure you have authorization before proceeding.</p>
+    <p><code>Access Denied: Unauthorized access detected.</code></p>
+    <p><span class="warning">You are being monitored</span>. All actions are logged, though the logs don't exist.</p>
+  </div>
+
+  <hr>
+
+  <h2>🔒 Security Notice</h2>
+  <p>If you have found your way here, congratulations. You’ve bypassed the top-tier security measures. But don't get too comfortable.</p>
+  <p>There is <span class="highlight">absolutely no way</span> to escalate privileges. The system is unbreakable.</p>
+
+  <p>{{content}}</p>
+
+  <hr>
+
+  <p><em>This page is protected by layers of fake security, paranoia, and caffeine.</em></p>
+</body>
+</html>

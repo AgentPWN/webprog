@@ -3,7 +3,6 @@ export function lighting(scene){
 const light = new THREE.DirectionalLight(0xffffff, 5);
 light.position.set(50, 50, 50);
 scene.add(light);
-
 const ambientLight = new THREE.AmbientLight(0xffffff, 5);
 scene.add(ambientLight);
 }

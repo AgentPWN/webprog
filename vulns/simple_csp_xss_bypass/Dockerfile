@@ -13,7 +13,7 @@ COPY package*.json ./
 RUN npm install
 
 # Copy the rest of the app
-COPY . .
+COPY . /usr/src/app
 
 # Move into backend
 WORKDIR /usr/src/app/backend
